@@ -1,0 +1,722 @@
+# Builds the private fork hungthai1401/paseo and publishes the files on this public repo.
+# Standard GitHub-hosted runners are free here. The source is checked out with
+# PASEO_CHECKOUT_TOKEN (Contents: Read on the private repo only). This workflow has no
+# pull_request trigger, so a fork of this repo cannot read that secret.
+#
+# Nothing is store-signed or notarized:
+#   * iOS IPA, xcodebuild with signing switched off. Sideloadly or AltStore re-signs it.
+#   * Android APK, signed with the Expo template's debug keystore. arm64 only.
+#   * Desktop for every OS electron-builder ships: macOS, Linux, and Windows, x64 and
+#     arm64. Each slice runs on a runner of that OS and arch. Notarization and the
+#     hardened runtime are off.
+#
+# Tags: `v<upstream version>-<n>`, e.g. `v0.13.0-1`. The private repo's
+# fork-app-release.yml only dispatches that tag here.
+#
+# Expo SDK 57 needs Xcode 26.4. macos-26 ships 26.4.1 and defaults to 26.6.
+# Windows x64 stays on windows-2022, and Windows arm64 on windows-11-arm. Both images
+# still have Visual Studio 2022. windows-latest and windows-11-vs2026-arm ship VS 18,
+# which node-gyp 11 cannot detect, and node-pty then fails during npm ci.
+#
+# There is deliberately no caching beyond setup-node's, and adding more will not make this
+# faster. Measured on v0.7.2-2: the iOS job spends 1033 of its 1260 seconds inside
+# xcodebuild, and Android spends 1536 on Metro plus 1356 on Gradle against 134 for
+# `npm ci`. The bottleneck is compilation, so the ceiling for every download cache put
+# together is three or four minutes out of a 21-to-52-minute release.
+#
+# It is worse than that on a tag push. A GitHub Actions cache can only be restored from
+# the ref that wrote it or from the default branch, so an entry written under
+# refs/tags/v0.7.2-2 is unreadable from v0.7.2-3 and gets evicted unread after seven days.
+# Every run so far confirms it: setup-node's restore takes 0-2s (a miss) while its save
+# takes 11-21s. setup-node's cache stays because it does pay off when you dispatch
+# repeatedly from one branch while working on this file.
+#
+# Making any of it count would mean warming the caches from a run on `fork`. Measure
+# before you build that -- the numbers above say it buys minutes, not tens of minutes.
+name: App release
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag on hungthai1401/paseo, for example v0.13.0-1"
+        type: string
+        required: true
+      variant:
+        description: "App variant to build (mobile only)"
+        type: choice
+        options: [production, development]
+        default: production
+      platforms:
+        description: "What to build"
+        type: choice
+        options: [ios, android, mobile, desktop, all]
+        default: all
+  repository_dispatch:
+    types: [paseo-app-release]
+
+# cancel-in-progress would abort a job mid-upload and leave the release holding half its
+# assets. Two different tags land in different groups anyway, so nothing queues in practice.
+concurrency:
+  group: app-release-${{ github.event.client_payload.tag || inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  APP_VARIANT: ${{ github.event.client_payload.variant || inputs.variant || 'production' }}
+  # Pinned, not "22". A runner that bumps its own minor turns an unrelated build failure
+  # into an afternoon of bisecting.
+  NODE_VERSION: "22.20.0"
+
+jobs:
+  # Refuses a tag that does not match the manifests before any compile starts.
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      release_tag: ${{ steps.resolve.outputs.release_tag }}
+      version: ${{ steps.resolve.outputs.version }}
+      source_ref: ${{ steps.resolve.outputs.source_ref }}
+      ios: ${{ steps.resolve.outputs.ios }}
+      android: ${{ steps.resolve.outputs.android }}
+      desktop: ${{ steps.resolve.outputs.desktop }}
+      desktop_matrix: ${{ steps.resolve.outputs.desktop_matrix }}
+    steps:
+      - name: Require the checkout token
+        env:
+          TOKEN: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "Add secret PASEO_CHECKOUT_TOKEN on hungthai1401/app." >&2
+            echo "Fine-grained PAT, Contents: Read, only on hungthai1401/paseo." >&2
+            exit 1
+          fi
+
+      - name: Checkout paseo
+        uses: actions/checkout@v4
+        with:
+          repository: hungthai1401/paseo
+          ref: ${{ github.event.client_payload.ref || inputs.ref }}
+          token: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+          persist-credentials: false
+
+      - name: Resolve the tag and the build set
+        id: resolve
+        env:
+          RELEASE_TAG: ${{ github.event.client_payload.tag || inputs.ref }}
+          SOURCE_REF: ${{ github.event.client_payload.ref || inputs.ref }}
+          # Empty means every platform. A tag dispatch sends "all".
+          SELECTOR: ${{ github.event.client_payload.platforms || inputs.platforms }}
+        run: |
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require("node:fs");
+
+          const tag = (process.env.RELEASE_TAG ?? "").trim();
+          const sourceRef = (process.env.SOURCE_REF ?? "").trim();
+          if (!sourceRef) {
+            throw new Error("Missing ref. Pass a tag such as v0.13.0-1.");
+          }
+          // `-<n>` is the fork counter. Upstream ships v0.13.0; our first build of it is
+          // v0.13.0-1, which is also a valid semver prerelease, so electron-builder and
+          // GitHub both accept it as a version.
+          if (tag && !/^v\d+\.\d+\.\d+(-\d+)?$/.test(tag)) {
+            throw new Error(`Expected a tag like v0.13.0-1, got ${tag}`);
+          }
+
+          const base = tag ? tag.slice(1).split("-")[0] : "";
+          if (base) {
+            const root = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const manifests = ["package.json", ...root.workspaces.map((w) => `${w}/package.json`)];
+            for (const file of manifests) {
+              const { version } = JSON.parse(fs.readFileSync(file, "utf8"));
+              if (version !== base) {
+                throw new Error(`${file} is ${version}; ${tag} expects ${base}`);
+              }
+            }
+            console.error(`Checked ${tag} against ${manifests.length} manifests.`);
+          }
+
+          // One job per OS and arch, on a runner of that same pair. npm ci then installs
+          // the native binaries that ship. The cross-arch script only backfills darwin
+          // packages, so a Linux or Windows slice cannot be built on the other arch.
+          // Windows images here still ship Visual Studio 2022. node-gyp 11 does not see VS 18.
+          const DESKTOP = [
+            { name: "macos-arm64", runner: "macos-26", args: "--mac --arm64", arch: "arm64" },
+            { name: "macos-x64", runner: "macos-26-intel", args: "--mac --x64", arch: "x64" },
+            { name: "linux-x64", runner: "ubuntu-24.04", args: "--linux --x64", arch: "x64" },
+            { name: "linux-arm64", runner: "ubuntu-24.04-arm", args: "--linux --arm64", arch: "arm64" },
+            { name: "windows-x64", runner: "windows-2022", args: "--win --x64", arch: "x64" },
+            { name: "windows-arm64", runner: "windows-11-arm", args: "--win --arm64", arch: "arm64" },
+          ];
+
+          const sets = {
+            ios: { ios: true, android: false, desktop: [] },
+            android: { ios: false, android: true, desktop: [] },
+            mobile: { ios: true, android: true, desktop: [] },
+            desktop: { ios: false, android: false, desktop: DESKTOP },
+            all: { ios: true, android: true, desktop: DESKTOP },
+          };
+          const chosen = sets[process.env.SELECTOR] ?? {
+            ios: true,
+            android: true,
+            desktop: DESKTOP,
+          };
+
+          console.log(`release_tag=${tag}`);
+          console.log(`source_ref=${sourceRef}`);
+          console.log(`version=${base}`);
+          console.log(`ios=${chosen.ios}`);
+          console.log(`android=${chosen.android}`);
+          console.log(`desktop=${chosen.desktop.length > 0}`);
+          console.log(`desktop_matrix=${JSON.stringify(chosen.desktop)}`);
+          NODE
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # This repo consumes generated .d.ts across workspaces, so typecheck needs the
+      # owning stacks built first. See CLAUDE.md.
+      - name: Build workspace declarations
+        run: |
+          npm run build:server
+          npm run build:app-deps
+
+      - name: Typecheck
+        run: npm run typecheck
+
+  # Created up front so each build job uploads its own assets as it finishes. The old
+  # shape gathered artifacts in one job at the end, which meant a failing Android build
+  # threw away a good IPA.
+  create-release:
+    needs: plan
+    if: ${{ needs.plan.outputs.release_tag != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Create the release if it is missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+          BUILD_IOS: ${{ needs.plan.outputs.ios }}
+          BUILD_ANDROID: ${{ needs.plan.outputs.android }}
+          BUILD_DESKTOP: ${{ needs.plan.outputs.desktop }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists."
+            exit 0
+          fi
+
+          # Say only what this run is actually going to attach.
+          {
+            echo "Sideload builds. Nothing here is store-signed or notarized."
+            if [ "$BUILD_IOS" = "true" ]; then
+              echo
+              echo "**IPA** - unsigned. Sign it with your own Apple ID through Sideloadly or"
+              echo "AltStore. A free Apple ID gives you 7 days before it has to be re-signed,"
+              echo "three sideloaded apps at a time, and no push notifications."
+            fi
+            if [ "$BUILD_ANDROID" = "true" ]; then
+              echo
+              echo "**APK** - arm64 only, signed with the Expo debug keystore. Android warns on"
+              echo "install, and it cannot update over a Play build."
+            fi
+            if [ "$BUILD_DESKTOP" = "true" ]; then
+              echo
+              echo "**Desktop** - unsigned. macOS, Linux, and Windows, each as x64 and arm64."
+              echo "Linux is an AppImage, deb, rpm, and tar.gz. Windows is an NSIS installer and a zip."
+              echo "On macOS, Gatekeeper will refuse the first launch;"
+              echo "clear the quarantine flag with:"
+              echo '```'
+              echo "xattr -dr com.apple.quarantine /Applications/Paseo.app"
+              echo '```'
+              echo "In-app updates are off in fork builds -- the updater manifest points at"
+              echo "getpaseo/paseo, so it is deliberately not published here. Grab the next tag"
+              echo "from this releases page by hand."
+            fi
+          } > notes.md
+
+          # No --prerelease and no --latest=false. `0.7.2-3` is formally a semver prerelease
+          # of `0.7.2`, but the `-3` is this fork's build counter, not a stability signal:
+          # build 3 is the newest and steadiest thing here. Marking it prerelease left the
+          # newest build badged Pre-release while v0.7.2-2 kept the Latest badge, and
+          # /releases/latest skipped it. GitHub never promotes a prerelease to Latest, so
+          # the two settings cannot be mixed.
+          #
+          # The guard those flags came from assumed a plain v0.7.2 release to be ranked
+          # below. A fork does not inherit upstream's releases, so there is none.
+          #
+          # --latest rather than letting GitHub decide, because its default logic compares
+          # semver prereleases and that is what went wrong above. Rebuilding an old tag
+          # cannot steal the badge: this step exits before `create` when the release exists.
+          gh release create "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$RELEASE_TAG" \
+            --latest \
+            --notes-file notes.md
+
+  ios-ipa:
+    needs: [plan, create-release]
+    if: >-
+      ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.ios == 'true'
+      && needs.create-release.result != 'failure' && needs.create-release.result != 'cancelled' }}
+    # macos-26 is the standard arm64 image: Xcode 26.6 by default, 26.4.1 installed.
+    # 3 cores and 7 GB. The bundle step caps Node at 4 GB so Metro leaves room for the OS.
+    runs-on: macos-26
+    timeout-minutes: 150
+    env:
+      RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+    steps:
+      - name: Checkout paseo
+        uses: actions/checkout@v4
+        with:
+          repository: hungthai1401/paseo
+          ref: ${{ needs.plan.outputs.source_ref }}
+          token: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # Expo SDK 57 fails inside ExpoModulesJSI when Swift tools are older than 6.2,
+      # and the maintainers require Xcode 26.4 (Swift 6.3). The image default moves.
+      # Pick a known-good one and refuse anything below 26.4.
+      - name: Select a compatible Xcode
+        run: |
+          set -euo pipefail
+          if sudo -n true 2>/dev/null; then
+            for app in /Applications/Xcode_26.6.app /Applications/Xcode_26.5.app \
+                       /Applications/Xcode_26.4.1.app /Applications/Xcode_26.4.app \
+                       /Applications/Xcode.app; do
+              if [ -d "$app/Contents/Developer" ]; then
+                sudo xcode-select --switch "$app/Contents/Developer"
+                break
+              fi
+            done
+          fi
+          xcodebuild -version
+          version="$(xcodebuild -version | awk '$1 == "Xcode" { print $2 }')"
+          major="${version%%.*}"
+          minor="${version#*.}"
+          minor="${minor%%.*}"
+          if [ "$major" -lt 26 ] || { [ "$major" -eq 26 ] && [ "$minor" -lt 4 ]; }; then
+            echo "Xcode $version is too old; Expo SDK 57 needs 26.4 or newer." >&2
+            exit 1
+          fi
+
+      # Both toolchain failures on the self-hosted box surfaced somewhere other than their
+      # cause, and each one cost an evening. Old CocoaPods could not parse React Native
+      # 0.81's podspecs, but `expo prebuild` swallows a failed `pod install` and still exits
+      # 0, so the job died three steps later on a missing .xcworkspace. A missing iOS device
+      # SDK came out of xcodebuild as "Unable to find a destination matching...". Fail here
+      # instead, by name, four seconds in.
+      #
+      # Hosted macOS runners are 3-core/7 GB, which is where a Metro death would come from.
+      # The self-hosted box has 16 GB, so that risk is gone -- but print the numbers anyway,
+      # because a full disk on a machine that never gets wiped between runs replaces it.
+      - name: Check the toolchain
+        run: |
+          set -euo pipefail
+          sysctl -n hw.memsize | awk '{printf "%.0f GB RAM\n", $1/1024/1024/1024}'
+          df -h /
+
+          # `tail -1` because a broken system-Ruby install prints a gem warning first.
+          pods="$(pod --version | tail -1)"
+          echo "CocoaPods $pods"
+          # 1.13 is where the `visionos` podspec DSL landed, and RN 0.81 uses it. macOS ships
+          # Ruby 2.6, CocoaPods 1.13 wants 2.7, so `sudo gem install` can never reach it --
+          # Homebrew's formula carries its own Ruby, which is why the fix is `brew install`.
+          if [ "$(printf '%s\n1.13.0\n' "$pods" | sort -V | head -1)" != "1.13.0" ]; then
+            echo "CocoaPods $pods is too old; React Native 0.81 needs 1.13 or newer." >&2
+            echo "Fix: sudo gem uninstall cocoapods --all, then brew install cocoapods." >&2
+            exit 1
+          fi
+
+          # Xcode installs without the iOS platform, and the simulator SDK alone does not
+          # satisfy `-destination generic/platform=iOS`.
+          if ! sdk="$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)"; then
+            echo "No iphoneos SDK. Fix: xcodebuild -downloadPlatform iOS" >&2
+            exit 1
+          fi
+          echo "iphoneos SDK: $sdk"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Same step EAS runs from packages/app's eas-build-post-install hook. The release
+      # bundle imports @getpaseo/client, which is generated, not checked in.
+      - name: Build app dependencies
+        run: |
+          npm run build:app-deps
+
+      # prebuild runs pod install itself when CocoaPods is on PATH, which it is here.
+      - name: Generate the Xcode project
+        working-directory: packages/app
+        run: npx expo prebuild --platform ios --clean --non-interactive
+
+      # No certificate, no provisioning profile, no Developer Program. Sideloadly signs the
+      # bundle with your Apple ID when it installs, and it rewrites the bundle id and strips
+      # entitlements a free account cannot hold, so anything we signed here would be thrown
+      # away. The name of the workspace follows `name` in app.config.js, so read it off disk
+      # rather than hardcoding "Paseo".
+      - name: Build the app unsigned
+        working-directory: packages/app/ios
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          workspace="$(ls -d ./*.xcworkspace | head -1)"
+          scheme="$(basename "$workspace" .xcworkspace)"
+          echo "Building $scheme from $workspace"
+          xcodebuild \
+            -workspace "$workspace" \
+            -scheme "$scheme" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            COMPILER_INDEX_STORE_ENABLE=NO
+
+      - name: Package the IPA
+        id: ipa
+        run: |
+          set -euo pipefail
+          app="$(find packages/app/ios/build/Build/Products/Release-iphoneos \
+            -maxdepth 1 -name '*.app' | head -1)"
+          if [ -z "$app" ]; then
+            echo "No .app was produced." >&2
+            exit 1
+          fi
+          # An .ipa is a zip holding the bundle under Payload/. That is the whole format.
+          rm -rf Payload
+          mkdir Payload
+          # ditto, not cp -R: cp mangles symlinks inside frameworks on case-insensitive
+          # volumes and the result fails to launch.
+          ditto "$app" "Payload/$(basename "$app")"
+          label="${RELEASE_TAG:-$(git rev-parse --short HEAD)}"
+          out="paseo-fork-${label}-${APP_VARIANT}.ipa"
+          zip -qry "$out" Payload
+
+          # A zip that unpacks cleanly and has an arm64 slice. Cheap next to finding out
+          # from someone whose install failed. The Mach-O name comes from
+          # CFBundleExecutable, so read it rather than assuming it matches the .app.
+          binary="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+            "$app/Info.plist" 2>/dev/null || true)"
+          if [ -n "$binary" ] && [ -f "$app/$binary" ]; then
+            lipo -info "$app/$binary"
+          fi
+          test -s "$out"
+          unzip -tq "$out" >/dev/null
+          echo "path=$out" >> "$GITHUB_OUTPUT"
+          echo "name=$out" >> "$GITHUB_OUTPUT"
+          ls -lh "$out"
+
+      - name: Upload to the release
+        if: ${{ env.RELEASE_TAG != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_TAG" "${{ steps.ipa.outputs.path }}" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload the IPA as an artifact
+        if: ${{ env.RELEASE_TAG == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: paseo-ipa-${{ github.run_id }}
+          path: ${{ steps.ipa.outputs.path }}
+          if-no-files-found: error
+
+  android-apk:
+    needs: [plan, create-release]
+    if: >-
+      ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.android == 'true'
+      && needs.create-release.result != 'failure' && needs.create-release.result != 'cancelled' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+    steps:
+      - name: Checkout paseo
+        uses: actions/checkout@v4
+        with:
+          repository: hungthai1401/paseo
+          ref: ${{ needs.plan.outputs.source_ref }}
+          token: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # This public image is 4-core/16 GB. skia and worklets still compile C++ per
+      # ABI and filled the disk, then Metro's peak took the whole runner down with it. Clear
+      # the toolchains nothing here builds against, and back the RAM with swap so a peak
+      # costs time instead of the job. EAS sidesteps all of it with `resourceClass: large`.
+      #
+      # Never touch /opt/hostedtoolcache wholesale -- it holds the Java and Node this job
+      # just installed, and removing it breaks JAVA_HOME.
+      - name: Make room on the runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/share/swift /opt/ghc \
+            /usr/local/share/powershell /usr/local/share/boost \
+            /usr/local/lib/android/sdk/ndk /usr/local/lib/android/sdk/emulator \
+            /opt/hostedtoolcache/CodeQL || true
+          docker image prune -af || true
+          # The runner ships with its own /swapfile already swapped on, so fallocate on that
+          # path fails with "Text file busy". Take it offline before resizing it.
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+          sudo fallocate -l 14G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+          df -h /
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app dependencies
+        run: |
+          npm run build:app-deps
+
+      - name: Generate the Android project
+        working-directory: packages/app
+        run: npx expo prebuild --platform android --clean --non-interactive
+
+      # Two runs died seconds after Metro wrote the bundle, with 27 GB of disk still free.
+      # A runner that stops answering is reported as "The operation was canceled", which
+      # names nothing, so sample memory and read it back.
+      - name: Sample memory in the background
+        run: |
+          nohup bash -c 'while true; do
+            printf "%s %s\n" "$(date -u +%H:%M:%S)" "$(free -m | awk "/^Mem:/ {print \$3\"/\"\$2\" MB used\"}")"
+            sleep 15
+          done' > /tmp/memory.log 2>&1 &
+
+      # Metro peaks while it holds the module graph and the source map for 5900 modules.
+      # Bundling in its own short-lived JVM keeps it off the same 7 GB as a Gradle daemon
+      # still sitting on the heap it used for Kotlin and C++. The heap ceiling has to leave
+      # room for that JVM and the OS -- 6144 on a 7 GB box is how the last run died.
+      - name: Bundle the JavaScript
+        working-directory: packages/app/android
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          ./gradlew --no-daemon :app:createBundleReleaseJsAndAssets \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Dorg.gradle.jvmargs=-Xmx1536m
+
+      # The task exclusions come from the `production-apk` profile in packages/app/eas.json.
+      # Lint on a generated project costs several minutes and gates nothing here.
+      #
+      # arm64-v8a only. The default four ABIs mean four native builds of skia and worklets,
+      # which is where the runtime and the disk go. Every phone shipped since about 2017 is
+      # arm64; add the others back if you need an emulator or a 32-bit device.
+      - name: Assemble the release APK
+        working-directory: packages/app/android
+        run: |
+          ./gradlew --no-daemon :app:assembleRelease \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Dorg.gradle.jvmargs=-Xmx3g \
+            -Dorg.gradle.workers.max=2 \
+            -x lint -x lintVitalAnalyzeRelease -x lintVitalRelease \
+            -x generateReleaseLintModel -x generateReleaseLintVitalModel
+
+      # always(), not failure(): a runner that dies mid-step leaves the job *cancelled*, and
+      # failure() skips that -- which is how the first sampler ran and reported nothing.
+      - name: Report memory
+        if: always()
+        run: |
+          tail -40 /tmp/memory.log || true
+          sudo dmesg 2>/dev/null | grep -i "out of memory\|oom-kill" | tail -20 || true
+          df -h /
+
+      - name: Name the APK after the build
+        id: apk
+        run: |
+          set -euo pipefail
+          src="$(find packages/app/android/app/build/outputs/apk/release -name '*.apk' | head -1)"
+          if [ -z "$src" ]; then
+            echo "No APK was produced." >&2
+            exit 1
+          fi
+          label="${RELEASE_TAG:-$(git rev-parse --short HEAD)}"
+          out="paseo-fork-${label}-${APP_VARIANT}.apk"
+          mv "$src" "$out"
+          echo "path=$out" >> "$GITHUB_OUTPUT"
+          echo "name=$out" >> "$GITHUB_OUTPUT"
+          ls -lh "$out"
+
+      - name: Upload to the release
+        if: ${{ env.RELEASE_TAG != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_TAG" "${{ steps.apk.outputs.path }}" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload the APK as an artifact
+        if: ${{ env.RELEASE_TAG == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: paseo-apk-${{ github.run_id }}
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+
+  desktop:
+    needs: [plan, create-release]
+    if: >-
+      ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.desktop == 'true'
+      && needs.create-release.result != 'failure' && needs.create-release.result != 'cancelled' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # `|| '[]'` because a `plan` that threw leaves this output empty, and fromJSON
+        # on an empty string fails the whole workflow instead of skipping the job.
+        target: ${{ fromJSON(needs.plan.outputs.desktop_matrix || '[]') }}
+    runs-on: ${{ matrix.target.runner }}
+    timeout-minutes: 90
+    env:
+      RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+      # No GH_TOKEN on the build step: electron-builder.yml points `publish` at
+      # getpaseo/paseo, and without a token it cannot go asking upstream about releases.
+      EP_GH_IGNORE_TIME: "true"
+      # Stops electron-builder hunting the keychain for a Developer ID that is not there.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout paseo
+        uses: actions/checkout@v4
+        with:
+          repository: hungthai1401/paseo
+          ref: ${{ needs.plan.outputs.source_ref }}
+          token: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Linux packaging tools
+        if: ${{ startsWith(matrix.target.name, 'linux-') }}
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends rpm fakeroot
+
+      - name: Install dependencies
+        run: npm ci
+
+      # npm just installed native binaries for this runner's architecture. When the target is
+      # the other one, fetch its binaries too, or electron-builder silently packages the
+      # wrong .node files. The script explains the whole trap.
+      - name: Fetch native packages for the target architecture
+        shell: bash
+        run: node packages/desktop/scripts/install-cross-arch-natives.mjs ${{ matrix.target.arch }}
+
+      # electron-builder names every artifact after packages/desktop's version, so this is
+      # what puts the tag in the filename. Only the desktop manifest moves; the tag check in
+      # `plan` already compared the rest against the tag.
+      - name: Stamp the desktop version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "$RELEASE_TAG" ]; then
+            version="${RELEASE_TAG#v}"
+          else
+            version="${{ needs.plan.outputs.version || '0.0.0' }}-dev.$(git rev-parse --short HEAD)"
+          fi
+          node -e '
+            const fs = require("node:fs");
+            const file = "packages/desktop/package.json";
+            const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+            pkg.version = process.argv[1];
+            fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+            console.log(`packages/desktop is now ${pkg.version}`);
+          ' "$version"
+
+      # build:desktop does the whole chain: app deps, the Expo web export the Electron
+      # renderer loads, then electron-builder.
+      #
+      # --publish never keeps electron-builder off upstream's releases. notarize and
+      # hardenedRuntime are on in electron-builder.yml for the real product and there is no
+      # Apple certificate here, so switch both off rather than fail at the signing step.
+      - name: Build the desktop package
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--publish never ${{ matrix.target.args }})
+          case "${{ matrix.target.name }}" in
+            macos-*) args+=(-c.mac.notarize=false -c.mac.hardenedRuntime=false) ;;
+          esac
+          npm run build:desktop -- "${args[@]}"
+
+      # Apple Silicon refuses to execute a binary with no signature at all, so the ad-hoc
+      # signature electron-builder applies is load-bearing. Print it: if a future version
+      # stops doing that, this is the line that says so, instead of a bug report about an
+      # app that bounces once in the Dock.
+      - name: Show the macOS signature
+        if: ${{ startsWith(matrix.target.name, 'macos-') }}
+        run: |
+          app="$(find packages/desktop/release -maxdepth 2 -name 'Paseo.app' | head -1)"
+          if [ -z "$app" ]; then
+            echo "No Paseo.app in the output; skipping." && exit 0
+          fi
+          codesign -dv --verbose=4 "$app" 2>&1 || echo "Unsigned."
+
+      - name: Collect the artifacts
+        id: dist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # Skip *.yml. Those are the electron-updater manifests, and they resolve against
+          # getpaseo/paseo, so publishing them would point fork users at upstream binaries.
+          found=0
+          for file in packages/desktop/release/*; do
+            case "$file" in
+              *.yml | *.yaml) continue ;;
+            esac
+            [ -f "$file" ] || continue
+            cp "$file" dist/
+            found=1
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "electron-builder produced no artifacts." >&2
+            ls -la packages/desktop/release || true
+            exit 1
+          fi
+          ls -lh dist
+
+      - name: Upload to the release
+        if: ${{ env.RELEASE_TAG != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload the desktop files as an artifact
+        if: ${{ env.RELEASE_TAG == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: paseo-${{ matrix.target.name }}-${{ github.run_id }}
+          path: dist/*
+          if-no-files-found: error
