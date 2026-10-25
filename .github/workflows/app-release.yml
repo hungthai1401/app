@@ -422,8 +422,18 @@ jobs:
           # ditto, not cp -R: cp mangles symlinks inside frameworks on case-insensitive
           # volumes and the result fails to launch.
           ditto "$app" "Payload/$(basename "$app")"
-          label="${RELEASE_TAG:-$(git rev-parse --short HEAD)}"
-          out="paseo-fork-${label}-${APP_VARIANT}.ipa"
+          if [ -n "$RELEASE_TAG" ]; then
+            version="${RELEASE_TAG#v}"
+          else
+            version="$(git rev-parse --short HEAD)"
+          fi
+          # production is the release. Another variant keeps a suffix so it cannot
+          # clobber that file.
+          suffix=""
+          if [ "$APP_VARIANT" != "production" ]; then
+            suffix="-${APP_VARIANT}"
+          fi
+          out="Paseo-${version}${suffix}.ipa"
           zip -qry "$out" Payload
 
           # A zip that unpacks cleanly and has an arm64 slice. Cheap next to finding out
@@ -578,8 +588,16 @@ jobs:
             echo "No APK was produced." >&2
             exit 1
           fi
-          label="${RELEASE_TAG:-$(git rev-parse --short HEAD)}"
-          out="paseo-fork-${label}-${APP_VARIANT}.apk"
+          if [ -n "$RELEASE_TAG" ]; then
+            version="${RELEASE_TAG#v}"
+          else
+            version="$(git rev-parse --short HEAD)"
+          fi
+          suffix=""
+          if [ "$APP_VARIANT" != "production" ]; then
+            suffix="-${APP_VARIANT}"
+          fi
+          out="Paseo-${version}${suffix}.apk"
           mv "$src" "$out"
           echo "path=$out" >> "$GITHUB_OUTPUT"
           echo "name=$out" >> "$GITHUB_OUTPUT"
