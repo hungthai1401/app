@@ -44,11 +44,6 @@ on:
         description: "Tag on hungthai1401/paseo, for example v0.13.0-1"
         type: string
         required: true
-      variant:
-        description: "App variant to build (mobile only)"
-        type: choice
-        options: [production, development]
-        default: production
       platforms:
         description: "What to build"
         type: choice
@@ -67,7 +62,7 @@ permissions:
   contents: write
 
 env:
-  APP_VARIANT: ${{ github.event.client_payload.variant || inputs.variant || 'production' }}
+  APP_VARIANT: production
   # Pinned, not "22". A runner that bumps its own minor turns an unrelated build failure
   # into an afternoon of bisecting.
   NODE_VERSION: "22.20.0"
@@ -427,13 +422,7 @@ jobs:
           else
             version="$(git rev-parse --short HEAD)"
           fi
-          # production is the release. Another variant keeps a suffix so it cannot
-          # clobber that file.
-          suffix=""
-          if [ "$APP_VARIANT" != "production" ]; then
-            suffix="-${APP_VARIANT}"
-          fi
-          out="Paseo-${version}${suffix}.ipa"
+          out="Paseo-${version}.ipa"
           zip -qry "$out" Payload
 
           # A zip that unpacks cleanly and has an arm64 slice. Cheap next to finding out
@@ -593,11 +582,7 @@ jobs:
           else
             version="$(git rev-parse --short HEAD)"
           fi
-          suffix=""
-          if [ "$APP_VARIANT" != "production" ]; then
-            suffix="-${APP_VARIANT}"
-          fi
-          out="Paseo-${version}${suffix}.apk"
+          out="Paseo-${version}.apk"
           mv "$src" "$out"
           echo "path=$out" >> "$GITHUB_OUTPUT"
           echo "name=$out" >> "$GITHUB_OUTPUT"
