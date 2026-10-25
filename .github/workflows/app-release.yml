@@ -50,7 +50,7 @@ on:
       platforms:
         description: "What to build"
         type: choice
-        options: [ios, android, mobile, desktop, all]
+        options: [ios, android, mobile, macos, desktop, all]
         default: all
   repository_dispatch:
     types: [paseo-app-release]
@@ -58,7 +58,7 @@ on:
 # cancel-in-progress would abort a job mid-upload and leave the release holding half its
 # assets. Two different tags land in different groups anyway, so nothing queues in practice.
 concurrency:
-  group: app-release-${{ github.event.client_payload.tag || inputs.ref || github.ref }}
+  group: app-release-${{ github.event.client_payload.tag || inputs.ref || github.ref }}-${{ github.event.client_payload.platforms || inputs.platforms || 'all' }}
   cancel-in-progress: false
 
 permissions:
@@ -155,6 +155,11 @@ jobs:
             ios: { ios: true, android: false, desktop: [] },
             android: { ios: false, android: true, desktop: [] },
             mobile: { ios: true, android: true, desktop: [] },
+            macos: {
+              ios: false,
+              android: false,
+              desktop: DESKTOP.filter((target) => target.name.startsWith("macos-")),
+            },
             desktop: { ios: false, android: false, desktop: DESKTOP },
             all: { ios: true, android: true, desktop: DESKTOP },
           };
@@ -659,13 +664,42 @@ jobs:
       # --publish never keeps electron-builder off upstream's releases. notarize and
       # hardenedRuntime are on in electron-builder.yml for the real product and there is no
       # Apple certificate here, so switch both off rather than fail at the signing step.
+      #
+      # The web export parses the generated protocol validator, about 17 MB in one file.
+      # Metro hands that file to a jest worker, one per core. On v0.13.0-1 both macOS
+      # runners died there ("Jest worker ran out of memory") while the 16 GB Linux and
+      # Windows runners finished. macos-26 has 7 GB and macos-26-intel has 14 GB, so the
+      # heap has to stay under that and there is only one worker.
       - name: Build the desktop package
         shell: bash
         run: |
           set -euo pipefail
           args=(--publish never ${{ matrix.target.args }})
           case "${{ matrix.target.name }}" in
-            macos-*) args+=(-c.mac.notarize=false -c.mac.hardenedRuntime=false) ;;
+            macos-arm64)
+              export NODE_OPTIONS=--max-old-space-size=4096
+              ;;
+            macos-x64)
+              export NODE_OPTIONS=--max-old-space-size=8192
+              ;;
+          esac
+          case "${{ matrix.target.name }}" in
+            macos-*)
+              args+=(-c.mac.notarize=false -c.mac.hardenedRuntime=false)
+              node <<'NODE'
+          const fs = require("node:fs");
+          const file = "package.json";
+          const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+          const from = "npx expo export --platform web";
+          const to = "npx expo export --platform web --max-workers 1";
+          const script = pkg.scripts["build:desktop"] ?? "";
+          if (!script.includes(from)) {
+            throw new Error("build:desktop no longer calls expo export the way this step expects");
+          }
+          pkg.scripts["build:desktop"] = script.replace(from, to);
+          fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+              ;;
           esac
           npm run build:desktop -- "${args[@]}"
 
