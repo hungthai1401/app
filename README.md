@@ -18,6 +18,6 @@ Workflow chỉ chạy bằng tag, `workflow_dispatch`, hoặc `repository_dispat
 gh workflow run app-release.yml --repo hungthai1401/app -f ref=v0.13.0-1 -f platforms=all
 ```
 
-`platforms`: `ios`, `android`, `mobile`, `macos`, `desktop`, `all`.
+`platforms`: `ios`, `android`, `mobile`, `macos`, `windows`, `desktop`, `all`. `windows` chỉ dựng lại lát arm64.
 
 `all` gồm IPA, APK arm64, và desktop cho macOS, Linux, Windows. Mỗi hệ có bản x64 và arm64. Linux ra AppImage, deb, rpm, tar.gz. Windows ra NSIS và zip. Windows x64 chạy trên `windows-2022`, Windows arm64 trên `windows-11-arm`. iOS chạy trên `macos-26`, Xcode 26.4 trở lên. APK chỉ có `arm64-v8a`.
