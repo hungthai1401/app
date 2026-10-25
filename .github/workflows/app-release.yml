@@ -649,19 +649,28 @@ jobs:
           set -euo pipefail
           if [ "${{ matrix.target.name }}" = "windows-arm64" ]; then
             npm ci --ignore-scripts
-            # Installing node-gyp in the repo re-resolves the whole tree and dies on an
-            # unrelated peer dependency. Unpack 12.4 beside the tree and drop it onto the
-            # copy npm ci already linked, so `node-gyp` on PATH is 12.4.
-            gyp=".node-gyp-12"
-            rm -rf "$gyp"
-            mkdir -p "$gyp"
-            npm pack node-gyp@12.4.0 --pack-destination "$gyp"
-            tar -xzf "$gyp"/node-gyp-*.tgz -C "$gyp"
-            npm install --prefix "$gyp/package" --ignore-scripts --omit=dev
+            # node-gyp has to be installed outside this repo. Doing it inside makes npm
+            # treat the folder as part of the workspace and link a `paseo` symlink, and
+            # copying that link back into node_modules loops. The .bin shim npm ci wrote
+            # already points at node_modules/node-gyp/bin/node-gyp.js, so replacing that
+            # directory is enough.
+            gyp="$(mktemp -d)"
+            (
+              cd "$gyp"
+              npm pack node-gyp@12.4.0
+              tar -xzf node-gyp-*.tgz
+              cd package
+              npm install --ignore-scripts --omit=dev
+            )
+            if [ -e "$gyp/package/node_modules/paseo" ]; then
+              echo "node-gyp install was captured by the workspace." >&2
+              exit 1
+            fi
             rm -rf node_modules/node-gyp
-            cp -a "$gyp/package" node_modules/node-gyp
+            mkdir -p node_modules/node-gyp
+            tar -C "$gyp/package" -cf - . | tar -C node_modules/node-gyp -xf -
             node -e "const v=require('./node_modules/node-gyp/package.json').version; if(v!=='12.4.0') throw new Error(v)"
-            npm rebuild
+            npm rebuild --foreground-scripts
             npm run postinstall
             rm -rf "$gyp"
           else
