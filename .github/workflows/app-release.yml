@@ -670,6 +670,45 @@ jobs:
             mkdir -p node_modules/node-gyp
             tar -C "$gyp/package" -cf - . | tar -C node_modules/node-gyp -xf -
             node -e "const v=require('./node_modules/node-gyp/package.json').version; if(v!=='12.4.0') throw new Error(v)"
+            # workerd is the website's Cloudflare runtime. It has no win32-arm64 binary,
+            # and its postinstall throws, which aborts the rebuild after the desktop
+            # native modules have already compiled.
+            node <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          function visit(dir) {
+            let entries;
+            try {
+              entries = fs.readdirSync(dir, { withFileTypes: true });
+            } catch {
+              return;
+            }
+            for (const entry of entries) {
+              if (!entry.isDirectory() || entry.name === ".git") continue;
+              const full = path.join(dir, entry.name);
+              if (entry.name === "workerd") {
+                const pkgPath = path.join(full, "package.json");
+                if (!fs.existsSync(pkgPath)) continue;
+                const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+                if (pkg.name !== "workerd" || !pkg.scripts) continue;
+                delete pkg.scripts.install;
+                delete pkg.scripts.postinstall;
+                fs.writeFileSync(pkgPath, JSON.stringify(pkg));
+                console.log(`skipped ${pkgPath}`);
+              }
+              const parent = path.basename(dir);
+              if (
+                entry.name === "node_modules" ||
+                entry.name === "packages" ||
+                entry.name.startsWith("@") ||
+                parent === "packages"
+              ) {
+                visit(full);
+              }
+            }
+          }
+          visit(".");
+          NODE
             npm rebuild --foreground-scripts
             npm run postinstall
             rm -rf "$gyp"
