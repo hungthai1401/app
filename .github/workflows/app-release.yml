@@ -149,8 +149,11 @@ jobs:
             { name: "macos-x64", runner: "macos-26-intel", args: "--mac --x64", arch: "x64" },
             { name: "linux-x64", runner: "ubuntu-24.04", args: "--linux --x64", arch: "x64" },
             { name: "linux-arm64", runner: "ubuntu-24.04-arm", args: "--linux --arm64", arch: "arm64" },
-            { name: "windows-x64", runner: "windows-2022", args: "--win --x64", arch: "x64" },
-            { name: "windows-arm64", runner: "windows-11-arm", args: "--win --arm64", arch: "arm64" },
+            // Name the targets. `--win --x64` leaves the target list empty, and then the
+            // arch list in electron-builder.yml (x64 and arm64) is what gets built, so the
+            // x64 job was publishing arm64 installers. A non-empty target list stops that.
+            { name: "windows-x64", runner: "windows-2022", args: "--win nsis --win zip --x64", arch: "x64" },
+            { name: "windows-arm64", runner: "windows-11-arm", args: "--win nsis --win zip --arm64", arch: "arm64" },
           ];
 
           const sets = {
@@ -162,9 +165,7 @@ jobs:
               android: false,
               desktop: DESKTOP.filter((target) => target.name.startsWith("macos-")),
             },
-            // The x64 job's electron-builder config also emits the arm64 installer, so a
-            // paired rebuild would overwrite the native arm64 files. This selector is the
-            // native arm64 slice, which is the one VS 2026 broke.
+            // Native arm64 only. The x64 slice already published its own installer.
             windows: {
               ios: false,
               android: false,
@@ -648,9 +649,21 @@ jobs:
           set -euo pipefail
           if [ "${{ matrix.target.name }}" = "windows-arm64" ]; then
             npm ci --ignore-scripts
-            npm install --no-save --no-package-lock --ignore-scripts node-gyp@12.4.0
+            # Installing node-gyp in the repo re-resolves the whole tree and dies on an
+            # unrelated peer dependency. Unpack 12.4 beside the tree and drop it onto the
+            # copy npm ci already linked, so `node-gyp` on PATH is 12.4.
+            gyp=".node-gyp-12"
+            rm -rf "$gyp"
+            mkdir -p "$gyp"
+            npm pack node-gyp@12.4.0 --pack-destination "$gyp"
+            tar -xzf "$gyp"/node-gyp-*.tgz -C "$gyp"
+            npm install --prefix "$gyp/package" --ignore-scripts --omit=dev
+            rm -rf node_modules/node-gyp
+            cp -a "$gyp/package" node_modules/node-gyp
+            node -e "const v=require('./node_modules/node-gyp/package.json').version; if(v!=='12.4.0') throw new Error(v)"
             npm rebuild
             npm run postinstall
+            rm -rf "$gyp"
           else
             npm ci
           fi
