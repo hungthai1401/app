@@ -47,7 +47,7 @@ on:
       platforms:
         description: "What to build"
         type: choice
-        options: [ios, android, mobile, macos, macos-arm64, windows, desktop, all]
+        options: [ios, android, mobile, macos, macos-arm64, windows, linux, desktop, all]
         default: all
   repository_dispatch:
     types: [paseo-app-release]
@@ -170,6 +170,11 @@ jobs:
               ios: false,
               android: false,
               desktop: DESKTOP.filter((target) => target.name === "windows-arm64"),
+            },
+            linux: {
+              ios: false,
+              android: false,
+              desktop: DESKTOP.filter((target) => target.name.startsWith("linux-")),
             },
             desktop: { ios: false, android: false, desktop: DESKTOP },
             all: { ios: true, android: true, desktop: DESKTOP },
@@ -759,17 +764,16 @@ jobs:
       # hardenedRuntime are on in electron-builder.yml for the real product and there is no
       # Apple certificate here, so switch both off rather than fail at the signing step.
       #
-      # The web export parses the generated protocol validator, about 17 MB in one file.
-      # Metro hands that file to a jest worker, one per core. On v0.13.0-1 both macOS
-      # runners died there ("Jest worker ran out of memory") while the 16 GB Linux and
-      # Windows runners finished. macos-26 has 7 GB and macos-26-intel has 14 GB, so the
-      # heap has to stay under that and there is only one worker.
+      # The web export parses the generated protocol validator, about 18 MB in one file.
+      # Metro hands that file to a jest worker, one per core. The worker's own heap dies
+      # with "Jest worker ran out of memory" before the kernel is out of RAM. One worker,
+      # and a heap that fits the runner.
       #
-      # v0.13.2-3 still died on macos-arm64, this time inside V8: "heap out of memory"
-      # at the 4096 cap. That is the process refusing to grow, not the kernel killing it,
-      # so the 7 GB runner had memory left. 6144 is the value that got this same runner
-      # killed when a second runtime shared the box (the Android bundle step). 5120 is
-      # the room between those two.
+      # macos-26 has 7 GB and macos-26-intel has 14 GB. v0.13.2-3 died on macos-arm64
+      # inside V8 at a 4096 cap, which is the process refusing to grow. 6144 got that
+      # same runner killed when a second runtime shared the box. 5120 is the room
+      # between those two. Linux runners are 16 GB; v0.15.0-1 still died there on the
+      # default worker heap, so they get the same single worker and an 8192 heap.
       - name: Build the desktop package
         shell: bash
         run: |
@@ -779,13 +783,17 @@ jobs:
             macos-arm64)
               export NODE_OPTIONS=--max-old-space-size=5120
               ;;
-            macos-x64)
+            macos-x64|linux-*)
               export NODE_OPTIONS=--max-old-space-size=8192
               ;;
           esac
           case "${{ matrix.target.name }}" in
             macos-*)
               args+=(-c.mac.notarize=false -c.mac.hardenedRuntime=false)
+              ;;
+          esac
+          case "${{ matrix.target.name }}" in
+            macos-*|linux-*)
               node <<'NODE'
           const fs = require("node:fs");
           const file = "package.json";
