@@ -165,11 +165,10 @@ jobs:
               android: false,
               desktop: DESKTOP.filter((target) => target.name === "macos-arm64"),
             },
-            // Native arm64 only. The x64 slice already published its own installer.
             windows: {
               ios: false,
               android: false,
-              desktop: DESKTOP.filter((target) => target.name === "windows-arm64"),
+              desktop: DESKTOP.filter((target) => target.name.startsWith("windows-")),
             },
             linux: {
               ios: false,
@@ -772,8 +771,8 @@ jobs:
       # macos-26 has 7 GB and macos-26-intel has 14 GB. v0.13.2-3 died on macos-arm64
       # inside V8 at a 4096 cap, which is the process refusing to grow. 6144 got that
       # same runner killed when a second runtime shared the box. 5120 is the room
-      # between those two. Linux runners are 16 GB; v0.15.0-1 still died there on the
-      # default worker heap, so they get the same single worker and an 8192 heap.
+      # between those two. Linux and Windows runners are 16 GB. v0.15.0-1 died on
+      # both from the default worker heap, so they get one worker and an 8192 heap.
       - name: Build the desktop package
         shell: bash
         run: |
@@ -783,7 +782,7 @@ jobs:
             macos-arm64)
               export NODE_OPTIONS=--max-old-space-size=5120
               ;;
-            macos-x64|linux-*)
+            macos-x64|linux-*|windows-*)
               export NODE_OPTIONS=--max-old-space-size=8192
               ;;
           esac
@@ -793,7 +792,7 @@ jobs:
               ;;
           esac
           case "${{ matrix.target.name }}" in
-            macos-*|linux-*)
+            macos-*|linux-*|windows-*)
               node <<'NODE'
           const fs = require("node:fs");
           const file = "package.json";
