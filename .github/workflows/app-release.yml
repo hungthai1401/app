@@ -282,6 +282,77 @@ jobs:
             --latest \
             --notes-file notes.md
 
+  # Writes "What's changed" into the release body, the release's section of CHANGELOG.md,
+  # and the "What's new" block of README.md, all from the fork's first-parent history
+  # (scripts/changelog.mjs). It runs beside the builds, so a failed build never holds the
+  # notes back. A rerun of the same tag rewrites the same section, so it is safe to repeat.
+  changelog:
+    needs: [plan, create-release]
+    if: ${{ needs.plan.outputs.release_tag != '' && needs.create-release.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Platform reruns of one tag land in different release groups; this one keeps their
+    # pushes to main from racing each other.
+    concurrency:
+      group: app-changelog
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Full history and tags, without file contents: the script only reads commits.
+      - name: Checkout paseo history
+        uses: actions/checkout@v4
+        with:
+          repository: hungthai1401/paseo
+          ref: ${{ needs.plan.outputs.source_ref }}
+          path: .paseo-source
+          token: ${{ secrets.PASEO_CHECKOUT_TOKEN }}
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: package.json
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Write the changelog
+        run: |
+          set -euo pipefail
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body -q .body > "$RUNNER_TEMP/body.md"
+          node scripts/changelog.mjs \
+            --source .paseo-source \
+            --tag "$RELEASE_TAG" \
+            --notes-in "$RUNNER_TEMP/body.md" \
+            --notes-out "$RUNNER_TEMP/notes.md"
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/notes.md"
+
+      - name: Commit CHANGELOG.md and README.md
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- CHANGELOG.md README.md; then
+            echo "CHANGELOG.md and README.md already match $RELEASE_TAG."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md README.md
+          git commit -m "docs(changelog): $RELEASE_TAG"
+          # Someone may push to main while the builds run. Rebase onto it and try again.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git pull --rebase origin main
+          done
+          echo "Could not push the changelog to main after 3 attempts." >&2
+          exit 1
+
   ios-ipa:
     needs: [plan, create-release]
     if: >-
