@@ -1,25 +1,282 @@
-# app
+# Paseo (fork builds)
 
-Workflow build công khai cho fork [hungthai1401/paseo](https://github.com/hungthai1401/paseo). Mã nguồn không nằm ở đây. Job checkout repo private bằng secret `PASEO_CHECKOUT_TOKEN`.
+**Run your coding agents on your own machine, and work with them from your desk or your phone.**
 
-Release nằm trên repo này. Runner chuẩn của repo public không trừ phút Actions.
+This repository publishes builds of a personal fork of [Paseo](https://github.com/getpaseo/paseo). Paseo is a daemon plus desktop, web and mobile apps for running coding agents (Claude Code, Codex, GitHub Copilot, OpenCode, Pi, Antigravity, Muse Code) against your real dev environment. The fork adds DevOps, database, messaging, design and team tools on top of it, so an agent can read your cluster, query your database or watch your CI from the same chat.
 
-## Secret
+The source lives in a private repository. This one holds the release workflow, the changelog, and the builds.
 
-Trên repo này, `PASEO_CHECKOUT_TOKEN`: fine-grained PAT, chỉ Contents: Read trên `hungthai1401/paseo`.
+[Download the latest release](https://github.com/hungthai1401/app/releases/latest)
 
-Trên repo private, `APP_DISPATCH_TOKEN`: fine-grained PAT, Contents: Read and write trên repo `app` này. Tag `v*` dùng token đó để gọi `repository_dispatch`.
+![A chat with an agent next to the Changes panel](docs/media/hero.webp)
 
-Workflow chỉ chạy bằng tag, `workflow_dispatch`, hoặc `repository_dispatch`. Không có `pull_request`.
+## What's new
 
-## Chạy
+<!-- changelog:start -->
+### v0.15.2-1 (2026-11-06)
+
+Moves to [Paseo 0.15.2](https://github.com/getpaseo/paseo/releases/tag/v0.15.2) from 0.15.1. Upstream's own changes are in its release notes.
+
+#### Added
+
+- **Databases:** Add MariaDB, Galera, CockroachDB and Redis-family flavors
+- **DevOps:** Add Prometheus, Thanos and Cortex to the DevOps menu
+- **Browser:** Run a headless chrome in the daemon and show agent tabs in the chat
+- **Spec mode:** Pick a Spec workflow before the agent exists
+- **Design:** Add the Design menu with the Figma port
+- **Design:** Add Canvas and share design_* tools with Figma
+
+#### Fixed
+
+- **Databases:** Wrap the connection sheet footer on phones
+- **Server:** Drop the fork's duplicate agent restart continuation
+- **App:** Keep a failed tool call's error on screen in the mobile sheet
+- **Spec mode:** Track the plan.md preset prompts that .gitignore hid
+- **SSH:** Let the import sheet bring key files from ~/.ssh
+
+Older builds: [CHANGELOG.md](CHANGELOG.md).
+<!-- changelog:end -->
+
+## What can it do?
+
+Everything upstream Paseo does, plus the fork's additions. Upstream features are marked with *(upstream)*.
+
+### Agents and chat
+
+- **Agents on your machine** *(upstream)*. Start Claude Code, Codex, Copilot, OpenCode and other providers in a project or a git worktree. The daemon keeps them running when the app closes.
+- **Any device** *(upstream)*. Desktop app for macOS, Windows and Linux, a web UI, iOS and Android apps, and a `paseo` CLI. The phone reaches your machine through an end-to-end encrypted relay.
+- **Permission cards** *(upstream)*. Approve or deny each tool call from any device.
+- **Recap and What Next**. Agents end a reply with a short recap and suggested follow-ups you can send, edit, or start in a new thread.
+- **Prompt enhancer**. Rewrites your draft before you send it, with Undo.
+- **Chat annotations**. Select text in a reply, comment on it, and the comments go out with your next message.
+- **Workspace pins**. Keep a passage at the top of every chat in a workspace.
+- **Side chat**. `/btw` and `/side` ask a question beside a running agent without touching its transcript.
+- **Shell commands**. Type `!` and a command in the composer. The output goes in front of the agent with your next message.
+- **Agent references**. Name another agent in a message and the receiver gets that agent's recent conversation.
+- **HTML renders and MCP Apps**. Agents can show charts and small interactive pages inside the chat, and MCP servers can ship their own tool UIs.
+- **Prompts library**. Markdown prompts shared across agents on a host, with history.
+- **Schedules** *(upstream)*. Run a prompt on a timer or a cron.
+- **ClickUp themes**. A violet ClickUp and ClickUp Dark theme with its own window shell, next to upstream's System, Light, Dark, Zinc, Midnight, Claude and Ghostty.
+
+### Working as a team
+
+- **Team mode**. One coding request becomes a forum thread: a lead agent plans, spawns peers, splits tasks on a board, and the agents review each other's work.
+- **Council**. Ask 2 to 6 models one question. They answer, review each other anonymously, and a chairman writes the final answer.
+- **Spec mode**. Walks an agent through a spec-driven workflow one phase at a time: spec, plan, tasks, implement, review.
+- **Artifacts**. A folder of documents agents write for a project in six steps. You comment and approve each step before the next one starts.
+- **Activity graph**. A canvas beside the chat that draws each turn: prompt, tool calls, subagents, approvals, errors.
+- **General policy**. One Markdown file of working rules the daemon gives every agent it starts.
+
+### DevOps
+
+- **Kubernetes**. Connect a kubeconfig context, browse workloads, config and events.
+- **Jenkins**. Jobs, builds, parameters and console logs.
+- **Argo CD**. Applications, sync, refresh and rollback, with list, pod and graph views of the resources.
+- **Prometheus and Thanos**. PromQL with graph and table views, alerts, targets and rules.
+- **SSH**. Saved servers, terminals the daemon keeps open, SFTP, port forwarding and snippets.
+- **Docker**. Containers, images and volumes on this machine or on a saved SSH server.
+
+Every DevOps tool also has agent tools, and anything that changes state asks for permission first.
+
+### Data
+
+- **Databases**. PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and ClickHouse with a table browser, a data grid and a SQL console.
+- **Redis**. A key browser and a command console.
+- **Search and vector stores**. Elasticsearch, OpenSearch, Meilisearch and Qdrant.
+- **Messaging**. RabbitMQ, Kafka and NATS: queues, exchanges, topics, and publishing.
+- **Vault**. HashiCorp Vault servers and local key/value stores, with agent tools behind permission cards.
+
+### Design and docs
+
+- **Diagrams**. Mermaid and Excalidraw files in your project, rendered and editable, with agent tools to draw them.
+- **Figma and Canvas**. Agents read and edit Figma files, or draw HTML artboards in the workspace that you comment on.
+- **Export to Obsidian**. Save an agent, a passage, a council run or a forum topic as a note in your vault, with an optional AI summary.
+
+### More tools
+
+- **Forge Hub**. GitHub and GitLab repositories, pull and merge requests, CI runs and logs, releases and issues, without opening a workspace.
+- **Project Management**. Jira, Trello and Beads boards, and handing their items to agents.
+- **Agentic browser**. Browser profiles, dialogs, iframes and uploads, a fake camera and mic, and raw CDP. The daemon also runs a headless Chrome per workspace when no desktop app is connected.
+- **Simulators**. Boot and drive the iOS simulators on your Mac, and hand them to agents.
+- **Workbench**. An intercepting proxy for simulator and browser traffic: capture, repeat and compare requests.
+- **Computer Use**. Agents drive your Mac or a sandbox VM through [cua](https://github.com/trycua/cua).
+- **Skills**. Install and invoke Agent Skills (`SKILL.md`) across providers.
+- **Memory**. Browse and edit the agent-memory store on the host.
+- **MCP registry**. Declare an MCP server once and pick which agents launch with it.
+- **Auto-Pin**. Pins each new workspace when its project's rule says so.
+
+## Tour
+
+### Agents on your phone
+
+The chat on a phone, with the recap and the suggested next prompts.
+
+<img src="docs/media/phone-chat.webp" alt="Agent chat on a phone" width="320">
+
+### Permission cards
+
+![A Bash permission card waiting for approval](docs/media/permission.webp)
+
+### Schedules
+
+![Two schedules, one on a cron and one every six hours](docs/media/schedules.webp)
+
+### Team mode
+
+![A Team forum thread with its phases and tabs](docs/media/team.webp)
+
+### Council
+
+![Council answers from three members, each with a different lens](docs/media/council.webp)
+
+### Kubernetes
+
+![Cluster overview with nodes, pods, deployments and pod health](docs/media/kubernetes.webp)
+
+### Jenkins
+
+![Jenkins jobs with their last build status](docs/media/jenkins.webp)
+
+### Argo CD
+
+![An Argo CD application with sync status and actions](docs/media/argocd.webp)
+
+### Prometheus
+
+![A PromQL range query drawn as a graph](docs/media/prometheus.webp)
+
+### SSH
+
+![Saved SSH servers grouped by tag](docs/media/ssh.webp)
+
+### Docker
+
+![Containers with their image, status and ports](docs/media/docker.webp)
+
+### Databases
+
+![The orders table of a SQLite database in the data grid](docs/media/database.webp)
+
+### Redis
+
+![A Redis hash open in the key browser](docs/media/redis.webp)
+
+### Messaging
+
+![A RabbitMQ broker overview](docs/media/messaging.webp)
+
+### Vault
+
+![Secrets in a KV v2 engine](docs/media/vault.webp)
+
+### Diagrams
+
+![A Mermaid flowchart rendered full screen](docs/media/diagram.webp)
+
+### Simulators
+
+![iOS simulators on the host, two of them booted](docs/media/simulators.webp)
+
+### Workbench
+
+![Workbench capture controls for simulators and the browser](docs/media/workbench.webp)
+
+### First run and themes
+
+![The first-run setup with the theme picker](docs/media/setup-themes.webp)
+
+## Install
+
+Grab the file for your platform from the [latest release](https://github.com/hungthai1401/app/releases/latest). Nothing here is store-signed or notarized.
+
+| Platform | File |
+| --- | --- |
+| macOS | `Paseo-<version>-arm64.dmg` (Apple silicon) or `-x64.dmg` (Intel) |
+| Windows | `Paseo-<version>-x64.exe` or `-arm64.exe` (installer), or the `.zip` |
+| Linux | AppImage, `.deb`, `.rpm` or `.tar.gz`, for x64 and arm64 |
+| Android | `Paseo-<version>.apk` (arm64) |
+| iOS | `Paseo-<version>.ipa` (unsigned) |
+
+### Desktop
+
+The desktop app runs the daemon for you. On macOS, Gatekeeper refuses the first launch of an unsigned app. Clear the quarantine flag after you drag the app to Applications:
 
 ```bash
-gh workflow run app-release.yml --repo hungthai1401/app -f ref=v0.13.0-1 -f platforms=all
+xattr -dr com.apple.quarantine /Applications/Paseo.app
 ```
 
-`platforms`: `ios`, `android`, `mobile`, `macos`, `windows`, `desktop`, `all`. `windows` chỉ dựng lại lát arm64.
+In-app updates are off in fork builds, because the updater points at upstream. Download the next release from this page by hand.
 
-`all` gồm IPA, APK arm64, và desktop cho macOS, Linux, Windows. Mỗi hệ có bản x64 và arm64. Linux ra AppImage, deb, rpm, tar.gz. Windows ra NSIS và zip. Windows x64 chạy trên `windows-2022`, Windows arm64 trên `windows-11-arm`. iOS chạy trên `macos-26`, Xcode 26.4 trở lên. APK chỉ có `arm64-v8a`.
+### Android
 
-Tên file là `Paseo-<version>-<arch>.<đuôi>` (`Paseo-0.13.0-1-arm64.dmg`, `Paseo-0.13.0-1-x64.exe`). APK và IPA không có arch: `Paseo-0.13.0-1.apk`. `deb`, `rpm` và AppImage giữ tên arch của định dạng (`amd64`, `arm64`, `x86_64`, `aarch64`).
+The APK is signed with the Expo debug keystore. Android warns on install, and the APK cannot update over a Play Store build of Paseo.
+
+### iOS (sideload)
+
+The IPA is unsigned. Sign it with your own Apple ID through [Sideloadly](https://sideloadly.io) or AltStore:
+
+1. Install Sideloadly on your Mac or PC and connect your iPhone with a cable.
+2. Drag `Paseo-<version>.ipa` into Sideloadly, enter your Apple ID, and press Start.
+3. On the phone, open Settings > General > VPN & Device Management and trust your Apple ID.
+4. Turn on Developer Mode if iOS asks for it (Settings > Privacy & Security > Developer Mode), then restart.
+
+A free Apple ID gives you 7 days before the app has to be re-signed, three sideloaded apps at a time, and no push notifications.
+
+### Connect the phone
+
+Run the desktop app (or the daemon) on your computer, then pair the phone from the desktop's Settings > Pair device by scanning the QR code.
+
+## Releases and the changelog
+
+A `v<upstream>-<n>` tag on the private repository (for example `v0.15.2-1`, the first fork build on Paseo 0.15.2) dispatches [`app-release.yml`](.github/workflows/app-release.yml) here. The workflow creates the release, builds every platform, and uploads the files.
+
+The changelog writes itself. After the release exists, the `changelog` job runs [`scripts/changelog.mjs`](scripts/changelog.mjs) against the tag:
+
+- It reads `git log --first-parent <previous tag>..<tag>` on the fork. Each merged PR's title is a Conventional Commit, so `feat` lands under Added, `perf` under Improved, and `fix` or `revert` under Fixed. Other types stay out.
+- It writes the section to [CHANGELOG.md](CHANGELOG.md), refreshes the "What's new" block above, and puts the same section at the top of the GitHub release notes.
+- It commits `CHANGELOG.md` and `README.md` to `main` as `docs(changelog): <tag>`.
+
+To rebuild the whole changelog from every tag, run this from a clone of this repository:
+
+```bash
+node scripts/changelog.mjs --source ../paseo --all
+```
+
+`--source` is a checkout of the fork with its full history and tags.
+
+### Running a build by hand
+
+```bash
+gh workflow run app-release.yml --repo hungthai1401/app -f ref=v0.15.2-1 -f platforms=all
+```
+
+`platforms` is one of `ios`, `android`, `mobile`, `macos`, `windows`, `desktop` or `all`. `windows` rebuilds only the arm64 slice.
+
+`all` builds the IPA, the arm64 APK, and desktop builds for macOS, Linux and Windows, each as x64 and arm64. Windows x64 runs on `windows-2022` and arm64 on `windows-11-arm`. iOS runs on `macos-26` with Xcode 26.4 or later.
+
+Files are named `Paseo-<version>-<arch>.<ext>`, for example `Paseo-0.15.2-1-arm64.dmg`. The APK and IPA have no arch. `deb`, `rpm` and AppImage keep their format's own arch names (`amd64`, `arm64`, `x86_64`, `aarch64`).
+
+### Secrets
+
+| Repository | Secret | Access |
+| --- | --- | --- |
+| this one | `PASEO_CHECKOUT_TOKEN` | Fine-grained PAT, Contents: Read on `hungthai1401/paseo` |
+| `hungthai1401/paseo` | `APP_DISPATCH_TOKEN` | Fine-grained PAT, Contents: Read and write on this repository |
+
+The workflow only runs from a tag, `workflow_dispatch` or `repository_dispatch`. It never runs on pull requests, since jobs check out private code.
+
+## Feedback
+
+Open an issue in this repository. Bugs that also happen in upstream Paseo belong in [getpaseo/paseo](https://github.com/getpaseo/paseo/issues).
+
+## Acknowledgements
+
+- [Paseo](https://github.com/getpaseo/paseo) by Mohamed Boudra, the base of everything here.
+- [JAgentDesk](https://github.com/knoobdev/jagentdesk), the source of Team mode, Forge Hub, the Docker cockpit, the Figma tool and the ClickUp themes.
+- [llm-council](https://github.com/karpathy/llm-council) and [Piggery](https://github.com/sting8k/piggery) for the Council flow. Piggery also supplied the default general policy.
+- [paseo-prompt-manager](https://github.com/yannelli/paseo-prompt-manager), [paseo-auto-pin](https://github.com/stv1024/paseo-auto-pin) and [paseo-sidechat](https://github.com/Moyf/paseo-sidechat), plugins this fork builds in.
+- [cua](https://github.com/trycua/cua) for Computer Use, and [munder-difflin](https://github.com/HarnessMD/munder-difflin) for the Team office art.
+
+## License
+
+Paseo is licensed under the Apache License 2.0. Third-party components keep the licenses of their authors.
