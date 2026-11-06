@@ -123,6 +123,26 @@ The agent ends its reply with what it did, what is still open and what it needs 
 
 ![A recap followed by two suggested prompts](docs/media/recap.webp)
 
+### Prompt enhancer
+
+A rough draft after "Plan first": the rewrite asks the agent to investigate and wait for approval. The Undo button sits where the enhance button was.
+
+![A rewritten draft in the composer](docs/media/prompt-enhancer.webp)
+
+### Chat annotations
+
+![A highlighted passage in a reply and one annotation waiting to go out with the next message](docs/media/chat-annotations.webp)
+
+### Side chat
+
+`/btw` asks a question beside the agent. The answer shows in the panel, and the main session receives nothing.
+
+![The Side chat panel answering a question next to the main chat](docs/media/side-chat.webp)
+
+### HTML renders
+
+![A dashboard an agent drew with html_render, inside the chat](docs/media/html-render.webp)
+
 ### Prompts library
 
 ![Four saved prompts with their tags](docs/media/prompts.webp)
@@ -141,9 +161,9 @@ The agent ends its reply with what it did, what is still open and what it needs 
 
 ### Spec mode
 
-Pick a workflow in the composer. The agent then works through it one phase at a time, and you approve each phase.
+Pick a workflow in the composer (Lite, OpenSpec, SDD Kit or Spec Kit). The agent then works through it one phase at a time, and you approve each phase. The Activity graph's Plan view shows where the change is.
 
-![The Spec mode popover with Lite, OpenSpec, SDD Kit and Spec Kit](docs/media/spec-mode.webp)
+![A spec ready for review, with the phase bar and the Plan view](docs/media/spec-mode.webp)
 
 ### Artifacts
 
@@ -200,6 +220,12 @@ Pick a workflow in the composer. The agent then works through it one phase at a 
 ### Diagrams
 
 ![A Mermaid flowchart rendered full screen](docs/media/diagram.webp)
+
+### Figma
+
+Sign in with your own Figma OAuth app, or pair Figma Link with the Paseo plugin in Figma Desktop so agents can edit the open file.
+
+![Figma Link with the local server, the plugin and the pairing code field](docs/media/figma.webp)
 
 ### Canvas
 
