@@ -117,6 +117,16 @@ The chat on a phone, with the recap and the suggested next prompts.
 
 ![A Bash permission card waiting for approval](docs/media/permission.webp)
 
+### Recap and What Next
+
+The agent ends its reply with what it did, what is still open and what it needs from you. Each suggestion has Send and Edit.
+
+![A recap followed by two suggested prompts](docs/media/recap.webp)
+
+### Prompts library
+
+![Four saved prompts with their tags](docs/media/prompts.webp)
+
 ### Schedules
 
 ![Two schedules, one on a cron and one every six hours](docs/media/schedules.webp)
@@ -128,6 +138,24 @@ The chat on a phone, with the recap and the suggested next prompts.
 ### Council
 
 ![Council answers from three members, each with a different lens](docs/media/council.webp)
+
+### Spec mode
+
+Pick a workflow in the composer. The agent then works through it one phase at a time, and you approve each phase.
+
+![The Spec mode popover with Lite, OpenSpec, SDD Kit and Spec Kit](docs/media/spec-mode.webp)
+
+### Artifacts
+
+![An artifact at the Design step, with Research and Questions approved](docs/media/artifacts.webp)
+
+### Activity graph
+
+![The Activity graph beside the chat, drawing one turn from prompt to answer](docs/media/activity-graph.webp)
+
+### General policy
+
+![The general policy editor in Settings](docs/media/general-policy.webp)
 
 ### Kubernetes
 
@@ -173,6 +201,16 @@ The chat on a phone, with the recap and the suggested next prompts.
 
 ![A Mermaid flowchart rendered full screen](docs/media/diagram.webp)
 
+### Canvas
+
+An agent draws HTML artboards in the workspace. You comment on an element or change a tweak, and the agent picks it up.
+
+![A checkout design with desktop and mobile artboards](docs/media/canvas.webp)
+
+### Export to Obsidian
+
+![Obsidian export settings with folder, file name and note template](docs/media/obsidian.webp)
+
 ### Simulators
 
 ![iOS simulators on the host, two of them booted](docs/media/simulators.webp)
@@ -180,6 +218,26 @@ The chat on a phone, with the recap and the suggested next prompts.
 ### Workbench
 
 ![Workbench capture controls for simulators and the browser](docs/media/workbench.webp)
+
+### Project Management
+
+![A Beads board with Ready, In progress and Waiting columns](docs/media/project-management.webp)
+
+### Skills
+
+![Browsing skills from anthropics/skills and openai/skills](docs/media/skills.webp)
+
+### Memory
+
+![Agent memory entries with tags, scope and related entries](docs/media/memory.webp)
+
+### MCP registry
+
+![Two MCP servers, one stdio and one http](docs/media/mcp.webp)
+
+### Auto-Pin
+
+![Auto-Pin with the default switch and a per-project rule](docs/media/auto-pin.webp)
 
 ### First run and themes
 
