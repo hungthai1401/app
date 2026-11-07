@@ -4,6 +4,28 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.3-1 -->
+## v0.15.3-1 (2026-11-07)
+
+Moves to [Paseo 0.15.3](https://github.com/getpaseo/paseo/releases/tag/v0.15.3) from 0.15.2. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Agent tools:** Leave out tool families with nothing saved
+- **Spec mode:** Add TinySpec preset and auto start in drafts
+- **DevOps:** Add Ports, listening ports by owner here and on SSH servers
+- **I18n:** Translate the SSH module strings in all eight locales
+- **I18n:** Translate the Obsidian export strings in all eight locales
+- **I18n:** Translate the orchestration board in all eight locales
+- **Simulators:** Show simulators live in the chat
+- **Apm:** Read traces from Elastic, Jaeger and Tempo in DevOps
+- **Figma:** Port JAgentDesk v0.9.55 Figma
+- **Spec builder:** Add the Spec menu and the Spec Builder
+
+### Fixed
+
+- **Computer:** Read screen focus from expo-router's navigation
+
 <!-- release:v0.15.2-1 -->
 ## v0.15.2-1 (2026-11-06)
 

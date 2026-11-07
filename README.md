@@ -13,26 +13,26 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.2-1 (2026-11-06)
+### v0.15.3-1 (2026-11-07)
 
-Moves to [Paseo 0.15.2](https://github.com/getpaseo/paseo/releases/tag/v0.15.2) from 0.15.1. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.15.3](https://github.com/getpaseo/paseo/releases/tag/v0.15.3) from 0.15.2. Upstream's own changes are in its release notes.
 
 #### Added
 
-- **Databases:** Add MariaDB, Galera, CockroachDB and Redis-family flavors
-- **DevOps:** Add Prometheus, Thanos and Cortex to the DevOps menu
-- **Browser:** Run a headless chrome in the daemon and show agent tabs in the chat
-- **Spec mode:** Pick a Spec workflow before the agent exists
-- **Design:** Add the Design menu with the Figma port
-- **Design:** Add Canvas and share design_* tools with Figma
+- **Agent tools:** Leave out tool families with nothing saved
+- **Spec mode:** Add TinySpec preset and auto start in drafts
+- **DevOps:** Add Ports, listening ports by owner here and on SSH servers
+- **I18n:** Translate the SSH module strings in all eight locales
+- **I18n:** Translate the Obsidian export strings in all eight locales
+- **I18n:** Translate the orchestration board in all eight locales
+- **Simulators:** Show simulators live in the chat
+- **Apm:** Read traces from Elastic, Jaeger and Tempo in DevOps
+- **Figma:** Port JAgentDesk v0.9.55 Figma
+- **Spec builder:** Add the Spec menu and the Spec Builder
 
 #### Fixed
 
-- **Databases:** Wrap the connection sheet footer on phones
-- **Server:** Drop the fork's duplicate agent restart continuation
-- **App:** Keep a failed tool call's error on screen in the mobile sheet
-- **Spec mode:** Track the plan.md preset prompts that .gitignore hid
-- **SSH:** Let the import sheet bring key files from ~/.ssh
+- **Computer:** Read screen focus from expo-router's navigation
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
