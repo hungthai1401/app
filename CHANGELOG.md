@@ -4,6 +4,17 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.4-1 -->
+## v0.15.4-1 (2026-11-10)
+
+Moves to [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4) from 0.15.3. Upstream's own changes are in its release notes.
+
+### Added
+
+- **SSH:** Port JAgentDesk v0.9.58 remote tasks, ssh_run card, and Cursor MCP results
+- **Docker:** Manage Docker Swarm from the cockpit and agent tools
+- **Spec mode:** Commit & push and open pr when a change finishes
+
 <!-- release:v0.15.3-2 -->
 ## v0.15.3-2 (2026-11-10)
 

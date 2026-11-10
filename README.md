@@ -13,25 +13,15 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.3-2 (2026-11-10)
+### v0.15.4-1 (2026-11-10)
 
-Based on [Paseo 0.15.3](https://github.com/getpaseo/paseo/releases/tag/v0.15.3).
+Moves to [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4) from 0.15.3. Upstream's own changes are in its release notes.
 
 #### Added
 
-- **Figma:** Port JAgentDesk v0.9.56 page-scoped loading and connection fixes
-- **Spec mode:** Give sdd kit adrs their own approve
-- **Databases:** Connect through a devops ssh server
-- **SSH:** Run agent commands on SSH servers with live job cards
-- **DevOps:** Add logs and grafana, read prometheus and apm through grafana
-
-#### Fixed
-
-- **SSH:** Retry Docker on a fresh login and add Disconnect to the servers list
-- **Spec mode:** Reply in the language the user writes in
-- **Composer:** Keep compact-then-send prompts through lag and network loss
-- **App:** Cap the spec mode review file list and let you drag it taller
-- **SSH:** Stream ssh and telnet terminal output to the app
+- **SSH:** Port JAgentDesk v0.9.58 remote tasks, ssh_run card, and Cursor MCP results
+- **Docker:** Manage Docker Swarm from the cockpit and agent tools
+- **Spec mode:** Commit & push and open pr when a change finishes
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
