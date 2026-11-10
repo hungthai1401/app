@@ -13,26 +13,25 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.3-1 (2026-11-07)
+### v0.15.3-2 (2026-11-10)
 
-Moves to [Paseo 0.15.3](https://github.com/getpaseo/paseo/releases/tag/v0.15.3) from 0.15.2. Upstream's own changes are in its release notes.
+Based on [Paseo 0.15.3](https://github.com/getpaseo/paseo/releases/tag/v0.15.3).
 
 #### Added
 
-- **Agent tools:** Leave out tool families with nothing saved
-- **Spec mode:** Add TinySpec preset and auto start in drafts
-- **DevOps:** Add Ports, listening ports by owner here and on SSH servers
-- **I18n:** Translate the SSH module strings in all eight locales
-- **I18n:** Translate the Obsidian export strings in all eight locales
-- **I18n:** Translate the orchestration board in all eight locales
-- **Simulators:** Show simulators live in the chat
-- **Apm:** Read traces from Elastic, Jaeger and Tempo in DevOps
-- **Figma:** Port JAgentDesk v0.9.55 Figma
-- **Spec builder:** Add the Spec menu and the Spec Builder
+- **Figma:** Port JAgentDesk v0.9.56 page-scoped loading and connection fixes
+- **Spec mode:** Give sdd kit adrs their own approve
+- **Databases:** Connect through a devops ssh server
+- **SSH:** Run agent commands on SSH servers with live job cards
+- **DevOps:** Add logs and grafana, read prometheus and apm through grafana
 
 #### Fixed
 
-- **Computer:** Read screen focus from expo-router's navigation
+- **SSH:** Retry Docker on a fresh login and add Disconnect to the servers list
+- **Spec mode:** Reply in the language the user writes in
+- **Composer:** Keep compact-then-send prompts through lag and network loss
+- **App:** Cap the spec mode review file list and let you drag it taller
+- **SSH:** Stream ssh and telnet terminal output to the app
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
