@@ -205,6 +205,8 @@ jobs:
       # This repo consumes generated .d.ts across workspaces, so typecheck needs the
       # owning stacks built first. See CLAUDE.md.
       - name: Build workspace declarations
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           npm run build:server
           npm run build:app-deps
@@ -447,6 +449,8 @@ jobs:
       # Same step EAS runs from packages/app's eas-build-post-install hook. The release
       # bundle imports @getpaseo/client, which is generated, not checked in.
       - name: Build app dependencies
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           npm run build:app-deps
 
