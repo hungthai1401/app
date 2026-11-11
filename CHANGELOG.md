@@ -4,6 +4,26 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.4-2 -->
+## v0.15.4-2 (2026-11-12)
+
+Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
+
+### Added
+
+- **Database:** Add skip TLS verification for search engines and logs
+- **Side chat:** Run side chats as daemon agents with bring back
+- **SSH:** Answer terminal password prompts with a secretRef
+- **App:** Live pill above the composer, with simulator and remote job tabs
+- **DevOps:** Add kubernetes annotate and exec, ask before every ssh_run
+- **Sims:** Cabled android and ios devices, and sideload
+
+### Fixed
+
+- **Composer:** Size the draft composer by its own width
+- **Subagents:** Show a child's pending permission on the parent's track
+- **DevOps:** Steer the SSH chat to the open terminal tab
+
 <!-- release:v0.15.4-1 -->
 ## v0.15.4-1 (2026-11-10)
 

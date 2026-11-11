@@ -13,15 +13,24 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.4-1 (2026-11-10)
+### v0.15.4-2 (2026-11-12)
 
-Moves to [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4) from 0.15.3. Upstream's own changes are in its release notes.
+Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
 
 #### Added
 
-- **SSH:** Port JAgentDesk v0.9.58 remote tasks, ssh_run card, and Cursor MCP results
-- **Docker:** Manage Docker Swarm from the cockpit and agent tools
-- **Spec mode:** Commit & push and open pr when a change finishes
+- **Database:** Add skip TLS verification for search engines and logs
+- **Side chat:** Run side chats as daemon agents with bring back
+- **SSH:** Answer terminal password prompts with a secretRef
+- **App:** Live pill above the composer, with simulator and remote job tabs
+- **DevOps:** Add kubernetes annotate and exec, ask before every ssh_run
+- **Sims:** Cabled android and ios devices, and sideload
+
+#### Fixed
+
+- **Composer:** Size the draft composer by its own width
+- **Subagents:** Show a child's pending permission on the parent's track
+- **DevOps:** Steer the SSH chat to the open terminal tab
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
