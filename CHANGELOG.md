@@ -4,6 +4,25 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.4-3 -->
+## v0.15.4-3 (2026-11-12)
+
+Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
+
+### Added
+
+- **No project:** Chats without a project in their own folder
+- **Project management:** Agent board, paging and attachment tools
+- **Vpn:** Route bound records through userspace VPN tunnels
+- **Desktop:** Bundle the vpn-bridge with its licenses
+
+### Fixed
+
+- **Next prompt:** Title the agent a new thread starts
+- **Next prompt:** Keep the panel when a reply's tail is slightly off
+- **Spec mode:** Hold next prompt's send while the dock waits and add SPEC: SCOPE
+- **Composer:** Send the auto compact follow-up while the chat tab is hidden
+
 <!-- release:v0.15.4-2 -->
 ## v0.15.4-2 (2026-11-12)
 

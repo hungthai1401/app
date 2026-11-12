@@ -13,24 +13,23 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.4-2 (2026-11-12)
+### v0.15.4-3 (2026-11-12)
 
 Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
 
 #### Added
 
-- **Database:** Add skip TLS verification for search engines and logs
-- **Side chat:** Run side chats as daemon agents with bring back
-- **SSH:** Answer terminal password prompts with a secretRef
-- **App:** Live pill above the composer, with simulator and remote job tabs
-- **DevOps:** Add kubernetes annotate and exec, ask before every ssh_run
-- **Sims:** Cabled android and ios devices, and sideload
+- **No project:** Chats without a project in their own folder
+- **Project management:** Agent board, paging and attachment tools
+- **Vpn:** Route bound records through userspace VPN tunnels
+- **Desktop:** Bundle the vpn-bridge with its licenses
 
 #### Fixed
 
-- **Composer:** Size the draft composer by its own width
-- **Subagents:** Show a child's pending permission on the parent's track
-- **DevOps:** Steer the SSH chat to the open terminal tab
+- **Next prompt:** Title the agent a new thread starts
+- **Next prompt:** Keep the panel when a reply's tail is slightly off
+- **Spec mode:** Hold next prompt's send while the dock waits and add SPEC: SCOPE
+- **Composer:** Send the auto compact follow-up while the chat tab is hidden
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
