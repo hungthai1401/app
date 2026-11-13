@@ -13,23 +13,30 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.4-3 (2026-11-12)
+### v0.15.4-4 (2026-11-13)
 
 Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
 
 #### Added
 
-- **No project:** Chats without a project in their own folder
-- **Project management:** Agent board, paging and attachment tools
-- **Vpn:** Route bound records through userspace VPN tunnels
-- **Desktop:** Bundle the vpn-bridge with its licenses
+- **Agent forum:** Give forum tools only to Team mode members
+- **DevOps:** Add skip TLS verification to APM, Prometheus, Grafana, Jenkins and Argo CD
+- **Messaging:** Add skip TLS verification to RabbitMQ, Kafka and NATS
+- **Project management:** Add skip TLS verification to Jira
+- **Metadata:** Add host-wide style instructions with a settings editor
+
+#### Improved
+
+- **Agent:** Shorten the Excalidraw path schema and the secrets block
 
 #### Fixed
 
-- **Next prompt:** Title the agent a new thread starts
-- **Next prompt:** Keep the panel when a reply's tail is slightly off
-- **Spec mode:** Hold next prompt's send while the dock waits and add SPEC: SCOPE
-- **Composer:** Send the auto compact follow-up while the chat tab is hidden
+- **Protocol:** Split the generated validators into files of about 1 MB
+- **Diagrams:** Keep the diagram tools out of the catalog when Diagrams is off
+- **Argo CD:** Send sync options in the shape Argo CD accepts
+- **History:** Load History when the screen mounts before the host connects
+- **Schedules:** Mark agent-target schedules gone after a reload
+- **Live pill:** Stop the compact sheet from crashing on PaneContext
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

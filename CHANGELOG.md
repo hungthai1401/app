@@ -4,6 +4,32 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.4-4 -->
+## v0.15.4-4 (2026-11-13)
+
+Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
+
+### Added
+
+- **Agent forum:** Give forum tools only to Team mode members
+- **DevOps:** Add skip TLS verification to APM, Prometheus, Grafana, Jenkins and Argo CD
+- **Messaging:** Add skip TLS verification to RabbitMQ, Kafka and NATS
+- **Project management:** Add skip TLS verification to Jira
+- **Metadata:** Add host-wide style instructions with a settings editor
+
+### Improved
+
+- **Agent:** Shorten the Excalidraw path schema and the secrets block
+
+### Fixed
+
+- **Protocol:** Split the generated validators into files of about 1 MB
+- **Diagrams:** Keep the diagram tools out of the catalog when Diagrams is off
+- **Argo CD:** Send sync options in the shape Argo CD accepts
+- **History:** Load History when the screen mounts before the host connects
+- **Schedules:** Mark agent-target schedules gone after a reload
+- **Live pill:** Stop the compact sheet from crashing on PaneContext
+
 <!-- release:v0.15.4-3 -->
 ## v0.15.4-3 (2026-11-12)
 
