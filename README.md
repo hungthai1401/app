@@ -13,30 +13,17 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.4-4 (2026-11-13)
+### v0.15.4-5 (2026-11-14)
 
 Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
 
 #### Added
 
-- **Agent forum:** Give forum tools only to Team mode members
-- **DevOps:** Add skip TLS verification to APM, Prometheus, Grafana, Jenkins and Argo CD
-- **Messaging:** Add skip TLS verification to RabbitMQ, Kafka and NATS
-- **Project management:** Add skip TLS verification to Jira
-- **Metadata:** Add host-wide style instructions with a settings editor
-
-#### Improved
-
-- **Agent:** Shorten the Excalidraw path schema and the secrets block
+- **Vpn:** Route Kubernetes, git and forge hosts through bound VPN profiles
 
 #### Fixed
 
-- **Protocol:** Split the generated validators into files of about 1 MB
-- **Diagrams:** Keep the diagram tools out of the catalog when Diagrams is off
-- **Argo CD:** Send sync options in the shape Argo CD accepts
-- **History:** Load History when the screen mounts before the host connects
-- **Schedules:** Mark agent-target schedules gone after a reload
-- **Live pill:** Stop the compact sheet from crashing on PaneContext
+- **Next prompt:** Stop what next sends failing silently
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

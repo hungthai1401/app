@@ -4,6 +4,19 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.15.4-5 -->
+## v0.15.4-5 (2026-11-14)
+
+Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
+
+### Added
+
+- **Vpn:** Route Kubernetes, git and forge hosts through bound VPN profiles
+
+### Fixed
+
+- **Next prompt:** Stop what next sends failing silently
+
 <!-- release:v0.15.4-4 -->
 ## v0.15.4-4 (2026-11-13)
 
