@@ -4,6 +4,16 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.16.0-1 -->
+## v0.16.0-1 (2026-11-16)
+
+Moves to [Paseo 0.16.0](https://github.com/getpaseo/paseo/releases/tag/v0.16.0) from 0.15.4. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Providers:** Manage OpenAI- and Anthropic-compatible API providers
+- **Vpn:** Per-host route modes and direct dial while the VPN switch is off
+
 <!-- release:v0.15.4-5 -->
 ## v0.15.4-5 (2026-11-14)
 

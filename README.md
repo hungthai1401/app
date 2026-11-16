@@ -13,17 +13,14 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.15.4-5 (2026-11-14)
+### v0.16.0-1 (2026-11-16)
 
-Based on [Paseo 0.15.4](https://github.com/getpaseo/paseo/releases/tag/v0.15.4).
+Moves to [Paseo 0.16.0](https://github.com/getpaseo/paseo/releases/tag/v0.16.0) from 0.15.4. Upstream's own changes are in its release notes.
 
 #### Added
 
-- **Vpn:** Route Kubernetes, git and forge hosts through bound VPN profiles
-
-#### Fixed
-
-- **Next prompt:** Stop what next sends failing silently
+- **Providers:** Manage OpenAI- and Anthropic-compatible API providers
+- **Vpn:** Per-host route modes and direct dial while the VPN switch is off
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
