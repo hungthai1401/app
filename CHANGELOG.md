@@ -4,6 +4,22 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.16.1-1 -->
+## v0.16.1-1 (2026-11-17)
+
+Moves to [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1) from 0.16.0. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Composer:** Predict the next message after a turn
+
+### Fixed
+
+- **Settings:** Drop browser tools card from host agents page
+- **Composer:** Scope model sheet settings to the selected provider and keep their lists on screen
+- **Desktop:** Stop restarting the daemon over the fork release suffix
+- **Kubernetes:** Resolve PodMetrics and plural kinds in agent tools
+
 <!-- release:v0.16.0-1 -->
 ## v0.16.0-1 (2026-11-16)
 

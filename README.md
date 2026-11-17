@@ -13,14 +13,20 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.16.0-1 (2026-11-16)
+### v0.16.1-1 (2026-11-17)
 
-Moves to [Paseo 0.16.0](https://github.com/getpaseo/paseo/releases/tag/v0.16.0) from 0.15.4. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1) from 0.16.0. Upstream's own changes are in its release notes.
 
 #### Added
 
-- **Providers:** Manage OpenAI- and Anthropic-compatible API providers
-- **Vpn:** Per-host route modes and direct dial while the VPN switch is off
+- **Composer:** Predict the next message after a turn
+
+#### Fixed
+
+- **Settings:** Drop browser tools card from host agents page
+- **Composer:** Scope model sheet settings to the selected provider and keep their lists on screen
+- **Desktop:** Stop restarting the daemon over the fork release suffix
+- **Kubernetes:** Resolve PodMetrics and plural kinds in agent tools
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
