@@ -4,6 +4,20 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.16.1-2 -->
+## v0.16.1-2 (2026-11-18)
+
+Based on [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1).
+
+### Added
+
+- **Command center:** Add a tools section that opens pages
+- **Browser:** Add a google chrome host for passkeys
+
+### Fixed
+
+- **App:** Fit the provider picker and slim the touch prediction button
+
 <!-- release:v0.16.1-1 -->
 ## v0.16.1-1 (2026-11-17)
 

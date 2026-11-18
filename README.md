@@ -13,20 +13,18 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.16.1-1 (2026-11-17)
+### v0.16.1-2 (2026-11-18)
 
-Moves to [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1) from 0.16.0. Upstream's own changes are in its release notes.
+Based on [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1).
 
 #### Added
 
-- **Composer:** Predict the next message after a turn
+- **Command center:** Add a tools section that opens pages
+- **Browser:** Add a google chrome host for passkeys
 
 #### Fixed
 
-- **Settings:** Drop browser tools card from host agents page
-- **Composer:** Scope model sheet settings to the selected provider and keep their lists on screen
-- **Desktop:** Stop restarting the daemon over the fork release suffix
-- **Kubernetes:** Resolve PodMetrics and plural kinds in agent tools
+- **App:** Fit the provider picker and slim the touch prediction button
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
