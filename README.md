@@ -13,18 +13,11 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.16.1-2 (2026-11-18)
+### v0.16.2-1 (2026-11-18)
 
-Based on [Paseo 0.16.1](https://github.com/getpaseo/paseo/releases/tag/v0.16.1).
+Moves to [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2) from 0.16.1. Upstream's own changes are in its release notes.
 
-#### Added
-
-- **Command center:** Add a tools section that opens pages
-- **Browser:** Add a google chrome host for passkeys
-
-#### Fixed
-
-- **App:** Fit the provider picker and slim the touch prediction button
+No fork changes beyond the upstream update and the build pipeline.
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
