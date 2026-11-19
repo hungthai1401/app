@@ -4,6 +4,22 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.16.2-2 -->
+## v0.16.2-2 (2026-11-19)
+
+Based on [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2).
+
+### Added
+
+- **Kubernetes:** Edit kubeconfig paths from the Kubernetes screen
+
+### Fixed
+
+- **Obsidian:** Add a per-host switch and stop auto-launching Obsidian
+- **App:** Scroll the devops and design tool tabs on phones
+- **Desktop:** Let chromium switches reach chromium instead of the cli
+- **App:** Open the new host's chat when the host switch changes host
+
 <!-- release:v0.16.2-1 -->
 ## v0.16.2-1 (2026-11-18)
 

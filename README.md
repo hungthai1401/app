@@ -13,11 +13,20 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.16.2-1 (2026-11-18)
+### v0.16.2-2 (2026-11-19)
 
-Moves to [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2) from 0.16.1. Upstream's own changes are in its release notes.
+Based on [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2).
 
-No fork changes beyond the upstream update and the build pipeline.
+#### Added
+
+- **Kubernetes:** Edit kubeconfig paths from the Kubernetes screen
+
+#### Fixed
+
+- **Obsidian:** Add a per-host switch and stop auto-launching Obsidian
+- **App:** Scroll the devops and design tool tabs on phones
+- **Desktop:** Let chromium switches reach chromium instead of the cli
+- **App:** Open the new host's chat when the host switch changes host
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
