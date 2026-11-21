@@ -13,20 +13,18 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.16.2-2 (2026-11-19)
+### v0.16.2-3 (2026-11-20)
 
 Based on [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2).
 
 #### Added
 
-- **Kubernetes:** Edit kubeconfig paths from the Kubernetes screen
+- **SSH:** Pick the startup snippet from the snippet library
+- **App:** Run unbound dock chats in no project
 
 #### Fixed
 
-- **Obsidian:** Add a per-host switch and stop auto-launching Obsidian
-- **App:** Scroll the devops and design tool tabs on phones
-- **Desktop:** Let chromium switches reach chromium instead of the cli
-- **App:** Open the new host's chat when the host switch changes host
+- **Kubernetes:** Let kubernetes_get logs pick a container
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

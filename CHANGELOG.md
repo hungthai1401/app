@@ -4,6 +4,20 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.16.2-3 -->
+## v0.16.2-3 (2026-11-20)
+
+Based on [Paseo 0.16.2](https://github.com/getpaseo/paseo/releases/tag/v0.16.2).
+
+### Added
+
+- **SSH:** Pick the startup snippet from the snippet library
+- **App:** Run unbound dock chats in no project
+
+### Fixed
+
+- **Kubernetes:** Let kubernetes_get logs pick a container
+
 <!-- release:v0.16.2-2 -->
 ## v0.16.2-2 (2026-11-19)
 
