@@ -4,6 +4,16 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.2-1 -->
+## v0.17.2-1 (2026-11-23)
+
+Moves to [Paseo 0.17.2](https://github.com/getpaseo/paseo/releases/tag/v0.17.2) from 0.17.1. Upstream's own changes are in its release notes.
+
+### Fixed
+
+- **Themes:** Match the ClickUp phone drawer to the page
+- **App:** Paint the compact workspace header with the chat surface
+
 <!-- release:v0.17.1-1 -->
 ## v0.17.1-1 (2026-11-22)
 

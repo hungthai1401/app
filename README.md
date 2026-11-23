@@ -13,11 +13,14 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.1-1 (2026-11-22)
+### v0.17.2-1 (2026-11-23)
 
-Moves to [Paseo 0.17.1](https://github.com/getpaseo/paseo/releases/tag/v0.17.1) from 0.16.2. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.17.2](https://github.com/getpaseo/paseo/releases/tag/v0.17.2) from 0.17.1. Upstream's own changes are in its release notes.
 
-No fork changes beyond the upstream update and the build pipeline.
+#### Fixed
+
+- **Themes:** Match the ClickUp phone drawer to the page
+- **App:** Paint the compact workspace header with the chat surface
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
