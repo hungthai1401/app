@@ -13,14 +13,18 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.2-1 (2026-11-23)
+### v0.17.3-1 (2026-11-24)
 
-Moves to [Paseo 0.17.2](https://github.com/getpaseo/paseo/releases/tag/v0.17.2) from 0.17.1. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.17.3](https://github.com/getpaseo/paseo/releases/tag/v0.17.3) from 0.17.2. Upstream's own changes are in its release notes.
+
+#### Added
+
+- **Keyboard:** Scroll panes with arrow keys on web and isolate the dev home
+- **Highlight:** Bump pierre highlights to 0.5.2 and call the lexer through nitro
 
 #### Fixed
 
-- **Themes:** Match the ClickUp phone drawer to the page
-- **App:** Paint the compact workspace header with the chat surface
+- **App:** Size the clickup gradient rect from layout, not percent
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

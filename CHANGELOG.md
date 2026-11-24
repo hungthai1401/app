@@ -4,6 +4,20 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.3-1 -->
+## v0.17.3-1 (2026-11-24)
+
+Moves to [Paseo 0.17.3](https://github.com/getpaseo/paseo/releases/tag/v0.17.3) from 0.17.2. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Keyboard:** Scroll panes with arrow keys on web and isolate the dev home
+- **Highlight:** Bump pierre highlights to 0.5.2 and call the lexer through nitro
+
+### Fixed
+
+- **App:** Size the clickup gradient rect from layout, not percent
+
 <!-- release:v0.17.2-1 -->
 ## v0.17.2-1 (2026-11-23)
 
