@@ -4,6 +4,24 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.4-1 -->
+## v0.17.4-1 (2026-11-25)
+
+Moves to [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4) from 0.17.3. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Sidebar:** Add an optional grid menu for the sidebar items
+- **Vault:** Pick the secret path and field from dropdowns
+- **Design canvas:** Port the v0.4 new design flow
+
+### Fixed
+
+- **Obsidian:** Skip the CLI probe while Obsidian is off and never run it
+- **Themes:** Match the clickup dark phone tab bar to the page
+- **Agent tools:** Cut oversized tool results and keep the newest log lines
+- **App:** Unblock the v0.17.4 app build typecheck
+
 <!-- release:v0.17.3-1 -->
 ## v0.17.3-1 (2026-11-24)
 

@@ -13,18 +13,22 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.3-1 (2026-11-24)
+### v0.17.4-1 (2026-11-25)
 
-Moves to [Paseo 0.17.3](https://github.com/getpaseo/paseo/releases/tag/v0.17.3) from 0.17.2. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4) from 0.17.3. Upstream's own changes are in its release notes.
 
 #### Added
 
-- **Keyboard:** Scroll panes with arrow keys on web and isolate the dev home
-- **Highlight:** Bump pierre highlights to 0.5.2 and call the lexer through nitro
+- **Sidebar:** Add an optional grid menu for the sidebar items
+- **Vault:** Pick the secret path and field from dropdowns
+- **Design canvas:** Port the v0.4 new design flow
 
 #### Fixed
 
-- **App:** Size the clickup gradient rect from layout, not percent
+- **Obsidian:** Skip the CLI probe while Obsidian is off and never run it
+- **Themes:** Match the clickup dark phone tab bar to the page
+- **Agent tools:** Cut oversized tool results and keep the newest log lines
+- **App:** Unblock the v0.17.4 app build typecheck
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
