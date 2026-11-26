@@ -13,22 +13,18 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.4-1 (2026-11-25)
+### v0.17.4-2 (2026-11-26)
 
-Moves to [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4) from 0.17.3. Upstream's own changes are in its release notes.
+Based on [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4).
 
 #### Added
 
-- **Sidebar:** Add an optional grid menu for the sidebar items
-- **Vault:** Pick the secret path and field from dropdowns
-- **Design canvas:** Port the v0.4 new design flow
+- **Browser:** Start any Chromium browser as the system browser
+- **Bots:** Port JAgentDesk v0.10.1 bots with Slack and Discord
 
 #### Fixed
 
-- **Obsidian:** Skip the CLI probe while Obsidian is off and never run it
-- **Themes:** Match the clickup dark phone tab bar to the page
-- **Agent tools:** Cut oversized tool results and keep the newest log lines
-- **App:** Unblock the v0.17.4 app build typecheck
+- **Docker:** Stop leaking docker events watchers on early unsubscribe
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

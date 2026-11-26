@@ -4,6 +4,20 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.4-2 -->
+## v0.17.4-2 (2026-11-26)
+
+Based on [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4).
+
+### Added
+
+- **Browser:** Start any Chromium browser as the system browser
+- **Bots:** Port JAgentDesk v0.10.1 bots with Slack and Discord
+
+### Fixed
+
+- **Docker:** Stop leaking docker events watchers on early unsubscribe
+
 <!-- release:v0.17.4-1 -->
 ## v0.17.4-1 (2026-11-25)
 
