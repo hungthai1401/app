@@ -13,18 +13,11 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.4-2 (2026-11-26)
+### v0.17.4-3 (2026-11-26)
 
 Based on [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4).
 
-#### Added
-
-- **Browser:** Start any Chromium browser as the system browser
-- **Bots:** Port JAgentDesk v0.10.1 bots with Slack and Discord
-
-#### Fixed
-
-- **Docker:** Stop leaking docker events watchers on early unsubscribe
+No fork changes beyond the upstream update and the build pipeline.
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
