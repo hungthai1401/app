@@ -13,11 +13,19 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.4-3 (2026-11-26)
+### v0.17.5-1 (2026-11-27)
 
-Based on [Paseo 0.17.4](https://github.com/getpaseo/paseo/releases/tag/v0.17.4).
+Moves to [Paseo 0.17.5](https://github.com/getpaseo/paseo/releases/tag/v0.17.5) from 0.17.4. Upstream's own changes are in its release notes.
 
-No fork changes beyond the upstream update and the build pipeline.
+#### Added
+
+- **Agent:** Switch providers mid-conversation with a session ledger handoff
+- **Vault:** Let vault_auth write a method's config with secretRef fields
+- **Server:** Re-ground agents after a provider compacts their context
+
+#### Fixed
+
+- **Server:** Keep a switched agent's timeline across daemon restarts
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->

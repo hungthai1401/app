@@ -4,6 +4,21 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.5-1 -->
+## v0.17.5-1 (2026-11-27)
+
+Moves to [Paseo 0.17.5](https://github.com/getpaseo/paseo/releases/tag/v0.17.5) from 0.17.4. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Agent:** Switch providers mid-conversation with a session ledger handoff
+- **Vault:** Let vault_auth write a method's config with secretRef fields
+- **Server:** Re-ground agents after a provider compacts their context
+
+### Fixed
+
+- **Server:** Keep a switched agent's timeline across daemon restarts
+
 <!-- release:v0.17.4-3 -->
 ## v0.17.4-3 (2026-11-26)
 
