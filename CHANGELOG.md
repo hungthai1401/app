@@ -4,6 +4,13 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.17.6-1 -->
+## v0.17.6-1 (2026-11-27)
+
+Moves to [Paseo 0.17.6](https://github.com/getpaseo/paseo/releases/tag/v0.17.6) from 0.17.5. Upstream's own changes are in its release notes.
+
+No fork changes beyond the upstream update and the build pipeline.
+
 <!-- release:v0.17.5-1 -->
 ## v0.17.5-1 (2026-11-27)
 
