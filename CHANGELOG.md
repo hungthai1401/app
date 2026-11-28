@@ -4,6 +4,16 @@ Every fork build, newest first. Each entry lists what the fork added on top of t
 upstream [Paseo](https://github.com/getpaseo/paseo) release it is based on. The release
 workflow writes this file; see [scripts/changelog.mjs](scripts/changelog.mjs).
 
+<!-- release:v0.18.1-1 -->
+## v0.18.1-1 (2026-11-28)
+
+Moves to [Paseo 0.18.1](https://github.com/getpaseo/paseo/releases/tag/v0.18.1) from 0.18.0. Upstream's own changes are in its release notes.
+
+### Added
+
+- **Jagentdesk:** Port v0.12.2 browser, bot and background work changes
+- Port JAgentDesk 0.12.3 notification feed, background work sources and fixes
+
 <!-- release:v0.18.0-1 -->
 ## v0.18.0-1 (2026-11-28)
 
