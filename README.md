@@ -13,11 +13,14 @@ The source lives in a private repository. This one holds the release workflow, t
 ## What's new
 
 <!-- changelog:start -->
-### v0.17.6-1 (2026-11-27)
+### v0.18.0-1 (2026-11-28)
 
-Moves to [Paseo 0.17.6](https://github.com/getpaseo/paseo/releases/tag/v0.17.6) from 0.17.5. Upstream's own changes are in its release notes.
+Moves to [Paseo 0.18.0](https://github.com/getpaseo/paseo/releases/tag/v0.18.0) from 0.17.6. Upstream's own changes are in its release notes.
 
-No fork changes beyond the upstream update and the build pipeline.
+#### Added
+
+- **Bots:** Port jagentdesk 0.11.0 to 0.12.1 bots with relay connectors
+- **Background work:** Port jagentdesk background task detail and live output
 
 Older builds: [CHANGELOG.md](CHANGELOG.md).
 <!-- changelog:end -->
